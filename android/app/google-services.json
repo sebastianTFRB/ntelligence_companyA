@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "272850360399",
+    "project_id": "inteligence-companya",
+    "storage_bucket": "inteligence-companya.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:272850360399:android:01c66a576f7158cde7723a",
+        "android_client_info": {
+          "package_name": "com.example.intelligence_company_ia"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3onKbB3TdQC9zFkwt-bausB5Cevns9rw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
