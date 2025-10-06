@@ -44,7 +44,14 @@ class _AdminScreenState extends State<AdminScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const ProjectSelectorAppBar(title: "Admin Home"),
+      appBar: ProjectSelectorAppBar(
+        title: "Arritmo",
+        backgroundColor: const Color.fromARGB(255, 107, 194, 190), 
+        customTitle: Image.asset(
+          'assets/logos/logo_D.png',
+          height: 250,
+        ),
+      ),
       body: const Center(child: Text("Pantalla Principal del Admin")),
       bottomNavigationBar: AdminBottomNav(
         items: const [
