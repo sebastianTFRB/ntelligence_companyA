@@ -14,25 +14,27 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  bool isLogin = true; // alterna entre login y registro
+  bool isLogin = true;
   String? selectedRole;
 
   Future<void> _authenticate() async {
     try {
       if (isLogin) {
-        // LOGIN
         UserCredential userCred = await _auth.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
 
-        DocumentSnapshot doc = await _firestore.collection("users").doc(userCred.user!.uid).get();
-        AppUser currentUser = AppUser.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+        DocumentSnapshot doc = await _firestore
+            .collection("users")
+            .doc(userCred.user!.uid)
+            .get();
+
+        AppUser currentUser =
+            AppUser.fromMap(doc.data() as Map<String, dynamic>, doc.id);
 
         _redirectUser(currentUser.role);
-
       } else {
-        // REGISTRO
         UserCredential userCred = await _auth.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
@@ -44,7 +46,10 @@ class _LoginScreenState extends State<LoginScreen> {
           role: selectedRole ?? "estudiante",
         );
 
-        await _firestore.collection("users").doc(newUser.uid).set(newUser.toMap());
+        await _firestore
+            .collection("users")
+            .doc(newUser.uid)
+            .set(newUser.toMap());
 
         _redirectUser(newUser.role);
       }
@@ -63,7 +68,6 @@ class _LoginScreenState extends State<LoginScreen> {
       case "profesor":
         Navigator.pushReplacementNamed(context, "/profesor_home");
         break;
-      case "estudiante":
       default:
         Navigator.pushReplacementNamed(context, "/estudiante_home");
         break;
@@ -73,54 +77,98 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue.shade50,
-      body: Center(
-        child: SingleChildScrollView(
-          child: Card(
-            elevation: 8,
-            margin: EdgeInsets.symmetric(horizontal: 24),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(24),
+      // Fondo morado con gradiente sutil
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF6A1B9A), Color(0xFF8E24AA)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white, // Tarjeta clara que contrasta con el fondo
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.school, size: 80, color: Colors.blueAccent),
-                  SizedBox(height: 16),
+                  // Logo
+                  Image.asset(
+                    'assets/auth/inicio.png',
+                    height: 120,
+                  ),
+                  const SizedBox(height: 16),
+
                   Text(
                     isLogin ? "Iniciar Sesión" : "Registro",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF6A1B9A),
+                    ),
                   ),
-                  SizedBox(height: 24),
+                  const SizedBox(height: 30),
+
+                  // Campos de texto
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      labelText: "Email",
-                      prefixIcon: Icon(Icons.email),
+                      labelText: "Correo electrónico",
+                      prefixIcon: const Icon(Icons.email_outlined,
+                          color: Color(0xFF6A1B9A)),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Color(0xFF6A1B9A), width: 2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
+
                   TextField(
                     controller: _passwordController,
+                    obscureText: true,
                     decoration: InputDecoration(
                       labelText: "Contraseña",
-                      prefixIcon: Icon(Icons.lock),
+                      prefixIcon:
+                          const Icon(Icons.lock_outline, color: Color(0xFF6A1B9A)),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Color(0xFF6A1B9A), width: 2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    obscureText: true,
                   ),
+
                   if (!isLogin) ...[
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       decoration: InputDecoration(
                         labelText: "Selecciona rol",
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                              color: Color(0xFF6A1B9A), width: 2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -132,23 +180,33 @@ class _LoginScreenState extends State<LoginScreen> {
                       }).toList(),
                     ),
                   ],
-                  SizedBox(height: 24),
+
+                  const SizedBox(height: 30),
                   ElevatedButton(
                     onPressed: _authenticate,
                     style: ElevatedButton.styleFrom(
-                      minimumSize: Size(double.infinity, 48),
+                      backgroundColor: const Color(0xFF6A1B9A),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      elevation: 5,
                     ),
-                    child: Text(isLogin ? "Iniciar Sesión" : "Registrarse"),
+                    child: Text(
+                      isLogin ? "Iniciar Sesión" : "Registrarse",
+                      style: const TextStyle(fontSize: 18),
+                    ),
                   ),
+                  const SizedBox(height: 12),
+
                   TextButton(
                     onPressed: () => setState(() => isLogin = !isLogin),
                     child: Text(
                       isLogin
                           ? "¿No tienes cuenta? Regístrate"
                           : "¿Ya tienes cuenta? Inicia sesión",
+                      style: const TextStyle(color: Color(0xFF6A1B9A)),
                     ),
                   ),
                 ],

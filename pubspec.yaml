@@ -36,5 +36,6 @@ flutter:
     - assets/logos/logo_B.png
     - assets/logos/logo_C.png
     - assets/logos/logo_D.png
+    - assets/auth/inicio.png
 
 
