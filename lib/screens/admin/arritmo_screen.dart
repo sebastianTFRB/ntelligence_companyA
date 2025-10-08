@@ -84,7 +84,7 @@ class _ArritmoScreenState extends State<ArritmoScreen> {
 
       case 1:
         // 🧩 CRUD de instrucciones
-        return const InstruccionesContextoScreen();
+        return const CrudArritmoScreen();
 
       case 2:
         //  Casos simulados

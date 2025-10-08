@@ -1,128 +1,117 @@
 import 'package:flutter/material.dart';
+import '../../models/instrucciones.dart';
+import '../../services/arritmo_api.dart';
+import '../../widgets/crud_tab_view.dart';
+import '../../widgets/crud_form_dialog.dart';
 
-class InstruccionesContextoScreen extends StatefulWidget {
-  const InstruccionesContextoScreen({super.key});
+class CrudArritmoScreen extends StatefulWidget {
+  const CrudArritmoScreen({super.key});
 
   @override
-  State<InstruccionesContextoScreen> createState() => _InstruccionesContextoScreenState();
+  State<CrudArritmoScreen> createState() => _CrudArritmoScreenState();
 }
 
-class _InstruccionesContextoScreenState extends State<InstruccionesContextoScreen> {
-  final List<Map<String, String>> _items = [];
-  final TextEditingController _tituloController = TextEditingController();
-  final TextEditingController _contenidoController = TextEditingController();
+class _CrudArritmoScreenState extends State<CrudArritmoScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  late Future<List<Instruccion>> _futureInstrucciones;
+  late Future<List<Instruccion>> _futureContextos;
 
-  void _mostrarDialogo({Map<String, String>? item, int? index}) {
-    if (item != null) {
-      _tituloController.text = item['titulo']!;
-      _contenidoController.text = item['contenido']!;
-    } else {
-      _tituloController.clear();
-      _contenidoController.clear();
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(item == null ? 'Nueva Instrucción' : 'Editar Instrucción'),
-        content: SingleChildScrollView(
-          child: Column(
-            children: [
-              TextField(
-                controller: _tituloController,
-                decoration: const InputDecoration(labelText: 'Título'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _contenidoController,
-                decoration: const InputDecoration(labelText: 'Contenido'),
-                maxLines: 4,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
-          ElevatedButton(
-            onPressed: () {
-              if (item == null) {
-                _items.add({
-                  'titulo': _tituloController.text,
-                  'contenido': _contenidoController.text,
-                });
-              } else {
-                _items[index!] = {
-                  'titulo': _tituloController.text,
-                  'contenido': _contenidoController.text,
-                };
-              }
-              setState(() {});
-              Navigator.pop(context);
-            },
-            child: const Text('Guardar'),
-          ),
-        ],
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _loadData();
   }
 
-  void _eliminarItem(int index) {
-    setState(() {
-      _items.removeAt(index);
-    });
+  void _loadData() {
+    _futureInstrucciones = ArritmoApi.listarInstrucciones();
+    _futureContextos = ArritmoApi.listarContextos();
+  }
+
+  void _refresh() => setState(_loadData);
+
+  Future<void> _recargarDatos() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Recargando datos...'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+
+    try {
+      await ArritmoApi.recargarDatos(); // 👈 llama al endpoint /recargar_datos
+      _refresh();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Datos y documentos recargados ✅')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al recargar: $e')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const Text(
-              "Gestión de Instrucciones y Contextos",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: _items.isEmpty
-                  ? const Center(child: Text("Aún no hay instrucciones registradas"))
-                  : ListView.builder(
-                      itemCount: _items.length,
-                      itemBuilder: (context, index) {
-                        final item = _items[index];
-                        return Card(
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          child: ListTile(
-                            title: Text(item['titulo']!, style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Text(item['contenido']!, maxLines: 2, overflow: TextOverflow.ellipsis),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit, color: Colors.blueAccent),
-                                  onPressed: () => _mostrarDialogo(item: item, index: index),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.redAccent),
-                                  onPressed: () => _eliminarItem(index),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          ],
-        ),
+      backgroundColor: Colors.red[50],
+      appBar: AppBar(
+        title: const Text('Gestión Arritmo'),
+        backgroundColor: Colors.redAccent,
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _mostrarDialogo(),
-        label: const Text("Agregar"),
-        icon: const Icon(Icons.add),
+      body: Column(
+        children: [
+          Expanded(
+            child: CrudTabView(
+              tabController: _tabController,
+              futureInstrucciones: _futureInstrucciones,
+              futureContextos: _futureContextos,
+              onRefresh: _refresh,
+              crearInstruccion: ArritmoApi.crearInstruccion,
+              actualizarInstruccion: ArritmoApi.actualizarInstruccion,
+              eliminarInstruccion: ArritmoApi.eliminarInstruccion,
+              crearContexto: ArritmoApi.crearContexto,
+              actualizarContexto: ArritmoApi.actualizarContexto,
+              eliminarContexto: ArritmoApi.eliminarContexto,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: _recargarDatos,
+              icon: const Icon(Icons.refresh, color: Colors.white),
+              label: const Text(
+                "Recargar datos y documentos",
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.redAccent,
+        onPressed: () {
+          final esInstruccion = _tabController.index == 0;
+          showCrudForm(
+            context: context,
+            esInstruccion: esInstruccion,
+            onCreate: esInstruccion
+                ? ArritmoApi.crearInstruccion
+                : ArritmoApi.crearContexto,
+            onUpdate: esInstruccion
+                ? ArritmoApi.actualizarInstruccion
+                : ArritmoApi.actualizarContexto,
+            onSaved: _refresh,
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

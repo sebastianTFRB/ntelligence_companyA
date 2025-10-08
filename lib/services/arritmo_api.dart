@@ -150,4 +150,20 @@ class ArritmoApi {
       throw Exception("Error al eliminar contexto: ${resp.body}");
     }
   }
+
+    // ---------------------------
+  // 🔄 Recargar datos (instrucciones + docs)
+  // ---------------------------
+
+  static Future<Map<String, dynamic>> recargarDatos() async {
+    final url = Uri.parse("$baseUrl/recargar");
+    final resp = await http.get(url);
+
+    if (resp.statusCode == 200) {
+      return jsonDecode(resp.body);
+    } else {
+      throw Exception("Error al recargar datos: ${resp.body}");
+    }
+  }
+
 }

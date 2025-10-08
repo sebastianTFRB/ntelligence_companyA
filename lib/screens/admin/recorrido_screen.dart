@@ -18,13 +18,6 @@ class _RecorridoScreenState extends State<RecorridoScreen> {
   String _respuesta = "";
   bool _cargando = false;
 
-  /// Pantallas del BottomNav
-  late final List<Widget> _pages = [
-    _buildIAScreen(),           // IA Home (actual)
-    const CrudRecorridoScreen(),         // CRUD de instrucciones / docs
-    const NavegacionScreen(),   // Mapa o navegación
-  ];
-
   Future<void> _enviarPregunta() async {
     final pregunta = _controller.text.trim();
     if (pregunta.isEmpty) return;
@@ -45,42 +38,55 @@ class _RecorridoScreenState extends State<RecorridoScreen> {
     }
   }
 
-  Widget _buildIAScreen() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Text(
-                _respuesta.isEmpty
-                    ? "Haz una pregunta sobre el recorrido 👇"
-                    : _respuesta,
-                style: const TextStyle(fontSize: 16),
-              ),
-            ),
-          ),
-          Row(
+  /// 🔹 Determina qué pantalla se muestra según el índice
+  Widget _getSelectedPage() {
+    switch (_currentIndex) {
+      case 0:
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
             children: [
               Expanded(
-                child: TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(
-                    hintText: "Escribe tu pregunta...",
-                    border: OutlineInputBorder(),
+                child: SingleChildScrollView(
+                  child: Text(
+                    _respuesta.isEmpty
+                        ? "Haz una pregunta sobre el recorrido 👇"
+                        : _respuesta,
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.send, color: Colors.blue),
-                onPressed: _cargando ? null : _enviarPregunta,
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: const InputDecoration(
+                        hintText: "Escribe tu pregunta...",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.send, color: Colors.blue),
+                    onPressed: _cargando ? null : _enviarPregunta,
+                  ),
+                ],
               ),
+              if (_cargando) const LinearProgressIndicator(),
             ],
           ),
-          if (_cargando) const LinearProgressIndicator(),
-        ],
-      ),
-    );
+        );
+
+      case 1:
+        return const CrudRecorridoScreen();
+
+      case 2:
+        return const NavegacionScreen();
+
+      default:
+        return const Center(child: Text("Sección desconocida"));
+    }
   }
 
   @override
@@ -94,7 +100,7 @@ class _RecorridoScreenState extends State<RecorridoScreen> {
           height: 250,
         ),
       ),
-      body: _pages[_currentIndex],
+      body: _getSelectedPage(),
       bottomNavigationBar: AdminBottomNav(
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.smart_toy), label: "IA"),

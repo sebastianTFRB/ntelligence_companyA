@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/instrucciones.dart';
 import '../../services/intelligence_api.dart';
-import '../../widgets/crud_list_widget.dart';
+import '../../widgets/crud_tab_view.dart';
 import '../../widgets/crud_form_dialog.dart';
-import '../../widgets/crud_confirm_delete.dart';
 
 class CrudScreen extends StatefulWidget {
   const CrudScreen({super.key});
@@ -12,7 +11,8 @@ class CrudScreen extends StatefulWidget {
   State<CrudScreen> createState() => _CrudScreenState();
 }
 
-class _CrudScreenState extends State<CrudScreen> with SingleTickerProviderStateMixin {
+class _CrudScreenState extends State<CrudScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late Future<List<Instruccion>> _futureInstrucciones;
   late Future<List<Instruccion>> _futureContextos;
@@ -38,67 +38,18 @@ class _CrudScreenState extends State<CrudScreen> with SingleTickerProviderStateM
       appBar: AppBar(
         title: const Text('Gestión Inteligencia Escolar'),
         backgroundColor: Colors.purple,
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          tabs: const [
-            Tab(icon: Icon(Icons.rule), text: 'Instrucciones'),
-            Tab(icon: Icon(Icons.menu_book), text: 'Contexto'),
-          ],
-        ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          CrudListWidget(
-            future: _futureInstrucciones,
-            esInstruccion: true,
-            onRefresh: _refresh,
-            onEdit: (item) async {
-              await showCrudForm(
-                context: context,
-                esInstruccion: true,
-                existing: item,
-                onCreate: IntelligenceAPI.crearInstruccion,
-                onUpdate: IntelligenceAPI.actualizarInstruccion,
-                onSaved: _refresh,
-              );
-            },
-            onDelete: (nombre) async {
-              await showConfirmDelete(
-                context: context,
-                nombre: nombre,
-                esInstruccion: true,
-                onDelete: IntelligenceAPI.eliminarInstruccion,
-                onDeleted: _refresh,
-              );
-            },
-          ),
-          CrudListWidget(
-            future: _futureContextos,
-            esInstruccion: false,
-            onRefresh: _refresh,
-            onEdit: (item) async {
-              await showCrudForm(
-                context: context,
-                esInstruccion: false,
-                existing: item,
-                onCreate: IntelligenceAPI.crearContexto,
-                onUpdate: IntelligenceAPI.actualizarContexto,
-                onSaved: _refresh,
-              );
-            },
-            onDelete: (nombre) async {
-              await showConfirmDelete(
-                context: context,
-                nombre: nombre,
-                esInstruccion: false,
-                onDelete: IntelligenceAPI.eliminarContexto,
-                onDeleted: _refresh,
-              );
-            },
-          ),
-        ],
+      body: CrudTabView(
+        tabController: _tabController,
+        futureInstrucciones: _futureInstrucciones,
+        futureContextos: _futureContextos,
+        onRefresh: _refresh,
+        crearInstruccion: IntelligenceAPI.crearInstruccion,
+        actualizarInstruccion: IntelligenceAPI.actualizarInstruccion,
+        eliminarInstruccion: IntelligenceAPI.eliminarInstruccion,
+        crearContexto: IntelligenceAPI.crearContexto,
+        actualizarContexto: IntelligenceAPI.actualizarContexto,
+        eliminarContexto: IntelligenceAPI.eliminarContexto,
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.purple,
