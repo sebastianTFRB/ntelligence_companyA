@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../models/instrucciones.dart';
-import '../../services/intelligence_api.dart';
+import '../../services/recorrido_api.dart';
 import '../../widgets/crud_list_widget.dart';
 import '../../widgets/crud_form_dialog.dart';
 import '../../widgets/crud_confirm_delete.dart';
 
-class CrudScreen extends StatefulWidget {
-  const CrudScreen({super.key});
+class CrudRecorridoScreen extends StatefulWidget {
+  const CrudRecorridoScreen({super.key});
 
   @override
-  State<CrudScreen> createState() => _CrudScreenState();
+  State<CrudRecorridoScreen> createState() => _CrudRecorridoScreenState();
 }
 
-class _CrudScreenState extends State<CrudScreen> with SingleTickerProviderStateMixin {
+class _CrudRecorridoScreenState extends State<CrudRecorridoScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late Future<List<Instruccion>> _futureInstrucciones;
   late Future<List<Instruccion>> _futureContextos;
@@ -25,8 +26,8 @@ class _CrudScreenState extends State<CrudScreen> with SingleTickerProviderStateM
   }
 
   void _loadData() {
-    _futureInstrucciones = IntelligenceAPI.listarInstrucciones();
-    _futureContextos = IntelligenceAPI.listarContextos();
+    _futureInstrucciones = RecorridoApi.listarInstrucciones();
+    _futureContextos = RecorridoApi.listarContextos();
   }
 
   void _refresh() => setState(_loadData);
@@ -34,16 +35,16 @@ class _CrudScreenState extends State<CrudScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.purple[50],
+      backgroundColor: Colors.blueGrey[50],
       appBar: AppBar(
-        title: const Text('Gestión Inteligencia Escolar'),
-        backgroundColor: Colors.purple,
+        title: const Text('Gestión del Recorrido'),
+        backgroundColor: Colors.blueGrey,
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
           tabs: const [
-            Tab(icon: Icon(Icons.rule), text: 'Instrucciones'),
-            Tab(icon: Icon(Icons.menu_book), text: 'Contexto'),
+            Tab(icon: Icon(Icons.map), text: 'Instrucciones'),
+            Tab(icon: Icon(Icons.article_outlined), text: 'Contexto'),
           ],
         ),
       ),
@@ -59,8 +60,8 @@ class _CrudScreenState extends State<CrudScreen> with SingleTickerProviderStateM
                 context: context,
                 esInstruccion: true,
                 existing: item,
-                onCreate: IntelligenceAPI.crearInstruccion,
-                onUpdate: IntelligenceAPI.actualizarInstruccion,
+                onCreate: RecorridoApi.crearInstruccion,
+                onUpdate: RecorridoApi.actualizarInstruccion,
                 onSaved: _refresh,
               );
             },
@@ -69,7 +70,7 @@ class _CrudScreenState extends State<CrudScreen> with SingleTickerProviderStateM
                 context: context,
                 nombre: nombre,
                 esInstruccion: true,
-                onDelete: IntelligenceAPI.eliminarInstruccion,
+                onDelete: RecorridoApi.eliminarInstruccion,
                 onDeleted: _refresh,
               );
             },
@@ -83,8 +84,8 @@ class _CrudScreenState extends State<CrudScreen> with SingleTickerProviderStateM
                 context: context,
                 esInstruccion: false,
                 existing: item,
-                onCreate: IntelligenceAPI.crearContexto,
-                onUpdate: IntelligenceAPI.actualizarContexto,
+                onCreate: RecorridoApi.crearContexto,
+                onUpdate: RecorridoApi.actualizarContexto,
                 onSaved: _refresh,
               );
             },
@@ -93,7 +94,7 @@ class _CrudScreenState extends State<CrudScreen> with SingleTickerProviderStateM
                 context: context,
                 nombre: nombre,
                 esInstruccion: false,
-                onDelete: IntelligenceAPI.eliminarContexto,
+                onDelete: RecorridoApi.eliminarContexto,
                 onDeleted: _refresh,
               );
             },
@@ -101,18 +102,18 @@ class _CrudScreenState extends State<CrudScreen> with SingleTickerProviderStateM
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.purple,
+        backgroundColor: Colors.blueGrey,
         onPressed: () {
           final esInstruccion = _tabController.index == 0;
           showCrudForm(
             context: context,
             esInstruccion: esInstruccion,
             onCreate: esInstruccion
-                ? IntelligenceAPI.crearInstruccion
-                : IntelligenceAPI.crearContexto,
+                ? RecorridoApi.crearInstruccion
+                : RecorridoApi.crearContexto,
             onUpdate: esInstruccion
-                ? IntelligenceAPI.actualizarInstruccion
-                : IntelligenceAPI.actualizarContexto,
+                ? RecorridoApi.actualizarInstruccion
+                : RecorridoApi.actualizarContexto,
             onSaved: _refresh,
           );
         },
