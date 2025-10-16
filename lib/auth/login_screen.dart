@@ -41,6 +41,7 @@ class _LoginScreenState extends State<LoginScreen>
   Future<void> _authenticate() async {
     try {
       if (isLogin) {
+        // 🔹 LOGIN EXISTENTE
         UserCredential userCred = await _auth.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
@@ -54,8 +55,9 @@ class _LoginScreenState extends State<LoginScreen>
         AppUser currentUser =
             AppUser.fromMap(doc.data() as Map<String, dynamic>, doc.id);
 
-        _redirectUser(currentUser.role);
+        _redirectUser(currentUser);
       } else {
+        // 🔹 NUEVO REGISTRO
         UserCredential userCred = await _auth.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
@@ -72,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen>
             .doc(newUser.uid)
             .set(newUser.toMap());
 
-        _redirectUser(newUser.role);
+        _redirectUser(newUser);
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -81,16 +83,25 @@ class _LoginScreenState extends State<LoginScreen>
     }
   }
 
-  void _redirectUser(String role) {
-    switch (role) {
+  // 🔹 Actualizado para enviar el objeto AppUser
+  void _redirectUser(AppUser user) {
+    switch (user.role) {
       case "admin":
         Navigator.pushReplacementNamed(context, "/admin_home");
         break;
       case "profesor":
-        Navigator.pushReplacementNamed(context, "/profesor_home");
+        Navigator.pushReplacementNamed(
+          context,
+          "/profesor_home",
+          arguments: user,
+        );
         break;
       default:
-        Navigator.pushReplacementNamed(context, "/estudiante_home");
+        Navigator.pushReplacementNamed(
+          context,
+          "/estudiante_home",
+          arguments: user,
+        );
         break;
     }
   }
@@ -154,7 +165,7 @@ class _LoginScreenState extends State<LoginScreen>
             ),
           ),
 
-          /// Semicírculos translúcidos (figuras geométricas)
+          /// Semicírculos translúcidos
           Positioned(
             bottom: -60,
             left: -40,

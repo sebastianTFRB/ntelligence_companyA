@@ -1,4 +1,10 @@
+
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart'; // <-- Para Android/iOS
+import 'package:audioplayers/audioplayers.dart';
+
 import '../../widgets/project_selector_appbar.dart';
 import '../../widgets/admin_bottom_nav.dart';
 import '../../services/recorrido_api.dart';
@@ -18,6 +24,7 @@ class _RecorridoScreenState extends State<RecorridoScreen> {
   String _respuesta = "";
   bool _cargando = false;
 
+  // 🔹 Enviar pregunta al backend
   Future<void> _enviarPregunta() async {
     final pregunta = _controller.text.trim();
     if (pregunta.isEmpty) return;
@@ -29,12 +36,29 @@ class _RecorridoScreenState extends State<RecorridoScreen> {
       setState(() => _respuesta = data["respuesta"] ?? "Sin respuesta");
 
       if (data["audio"] != null) {
-        await RecorridoApi.reproducirAudio(data["audio"]);
+        await _reproducirAudioBase64(data["audio"]);
       }
     } catch (e) {
       setState(() => _respuesta = "❌ Error: $e");
     } finally {
       setState(() => _cargando = false);
+    }
+  }
+
+  // 🔹 Reproducir audio base64 compatible Android/iOS
+  Future<void> _reproducirAudioBase64(String base64Audio) async {
+    try {
+      final bytes = base64Decode(base64Audio);
+
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/temp_audio.wav');
+
+      await file.writeAsBytes(bytes, flush: true);
+
+      final audioPlayer = AudioPlayer();
+      await audioPlayer.play(DeviceFileSource(file.path));
+    } catch (e) {
+      debugPrint("Error reproduciendo audio: $e");
     }
   }
 
@@ -89,6 +113,7 @@ class _RecorridoScreenState extends State<RecorridoScreen> {
     }
   }
 
+  // 🔹 Scaffold principal
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../auth/login_screen.dart';
+
 import '../models/users_model.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -28,40 +28,48 @@ class _SplashScreenState extends State<SplashScreen> {
     final user = _auth.currentUser;
     if (user == null) {
       // No logueado → ir al login
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => LoginScreen()),
-      );
-    } else {
-      // Logueado → consultamos su rol en Firestore
-      final doc =
-          await _firestore.collection("users").doc(user.uid).get();
+      Navigator.pushReplacementNamed(context, '/login');
+      return;
+    }
 
-      if (doc.exists) {
-        final currentUser =
-            AppUser.fromMap(doc.data() as Map<String, dynamic>, doc.id);
-        _redirectUser(currentUser.role);
-      } else {
+    try {
+      final doc = await _firestore.collection("users").doc(user.uid).get();
+
+      if (!doc.exists) {
         // Si no hay documento en Firestore → forzamos login
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => LoginScreen()),
-        );
+        Navigator.pushReplacementNamed(context, '/login');
+        return;
       }
+
+      final currentUser =
+          AppUser.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+
+      _redirectUser(currentUser);
+    } catch (e) {
+      debugPrint("❌ Error cargando usuario: $e");
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
-  void _redirectUser(String role) {
-    switch (role) {
+  void _redirectUser(AppUser user) {
+    switch (user.role) {
       case "admin":
         Navigator.pushReplacementNamed(context, "/admin_home");
         break;
       case "profesor":
-        Navigator.pushReplacementNamed(context, "/profesor_home");
+        Navigator.pushReplacementNamed(
+          context,
+          "/profesor_home",
+          arguments: user,
+        );
         break;
       case "estudiante":
       default:
-        Navigator.pushReplacementNamed(context, "/estudiante_home");
+        Navigator.pushReplacementNamed(
+          context,
+          "/estudiante_home",
+          arguments: user,
+        );
         break;
     }
   }
@@ -74,8 +82,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo (puedes poner una imagen en assets/logo.png)
-            Icon(Icons.school, size: 100, color: Colors.white),
+            const Icon(Icons.school, size: 100, color: Colors.white),
             const SizedBox(height: 20),
             const Text(
               "Intelligence School",

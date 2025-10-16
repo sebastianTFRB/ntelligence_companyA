@@ -5,7 +5,7 @@ import 'package:audioplayers/audioplayers.dart';
 import '../models/instrucciones.dart'; // 👈 Usa el mismo modelo
 
 class ArritmoApi {
-  static const String baseUrl = "http://10.0.2.2:8000/arritmo";
+  static const String baseUrl = "http://10.162.248.179:8000/arritmo";
   // 📌 Cambia por tu IP LAN si pruebas en dispositivo físico
 
   // ---------------------------

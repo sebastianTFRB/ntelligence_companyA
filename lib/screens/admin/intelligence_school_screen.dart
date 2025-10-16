@@ -1,15 +1,26 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:intelligence_company_ia/screens/inteligenceschool/gestion_usuarios_screen.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:audioplayers/audioplayers.dart';
+
 import '../../widgets/project_selector_appbar.dart';
 import '../../widgets/admin_bottom_nav.dart';
 import '../../services/intelligence_api.dart';
-import '../inteligenceschool/crud_screen.dart'; // 👈 importa tu pantalla CRUD
-import '../inteligenceschool/materias_screen.dart'; // 👈 importa tu pantalla de materias
+
+// 🔹 Pantallas del módulo IntelligenceSchool
+import '../inteligenceschool/crud_screen.dart';
+import '../inteligenceschool/materias_screen.dart';
+
+ // ✅ NUEVA pantalla
 
 class IntelligenceSchoolScreen extends StatefulWidget {
   const IntelligenceSchoolScreen({super.key});
 
   @override
-  State<IntelligenceSchoolScreen> createState() => _IntelligenceSchoolScreenState();
+  State<IntelligenceSchoolScreen> createState() =>
+      _IntelligenceSchoolScreenState();
 }
 
 class _IntelligenceSchoolScreenState extends State<IntelligenceSchoolScreen> {
@@ -18,14 +29,7 @@ class _IntelligenceSchoolScreenState extends State<IntelligenceSchoolScreen> {
   String _respuesta = "";
   bool _cargando = false;
 
-  // 📚 Lista de páginas que se mostrarán en el bottom nav
-  late final List<Widget> _pages = [
-    _buildIATestPage(), // Página de IA
-    const CrudScreen(), // CRUD de usuarios
-    const MateriasScreen(), // Materias
-  ];
-
-  // 🔹 Lógica del envío de pregunta a la IA
+  // 🔹 Enviar pregunta a la IA
   Future<void> _enviarPregunta() async {
     final pregunta = _controller.text.trim();
     if (pregunta.isEmpty) return;
@@ -34,11 +38,10 @@ class _IntelligenceSchoolScreenState extends State<IntelligenceSchoolScreen> {
 
     try {
       final data = await IntelligenceAPI.enviarPregunta(pregunta);
-      setState(() => _respuesta = data["respuesta"]);
+      setState(() => _respuesta = data["respuesta"] ?? "Sin respuesta");
 
-      // Reproducir audio si el backend lo devuelve
       if (data["audio"] != null) {
-        await IntelligenceAPI.reproducirAudio(data["audio"]);
+        await _reproducirAudioBase64(data["audio"]);
       }
     } catch (e) {
       setState(() => _respuesta = "❌ Error: $e");
@@ -47,7 +50,20 @@ class _IntelligenceSchoolScreenState extends State<IntelligenceSchoolScreen> {
     }
   }
 
-  // 🧠 Página principal de IA
+  Future<void> _reproducirAudioBase64(String base64Audio) async {
+    try {
+      final bytes = base64Decode(base64Audio);
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/temp_audio.wav');
+      await file.writeAsBytes(bytes, flush: true);
+      final audioPlayer = AudioPlayer();
+      await audioPlayer.play(DeviceFileSource(file.path));
+    } catch (e) {
+      debugPrint("Error reproduciendo audio: $e");
+    }
+  }
+
+  // 🧠 Página de prueba con IA
   Widget _buildIATestPage() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -56,7 +72,9 @@ class _IntelligenceSchoolScreenState extends State<IntelligenceSchoolScreen> {
           Expanded(
             child: SingleChildScrollView(
               child: Text(
-                _respuesta.isEmpty ? "Haz una pregunta a la IA 👇" : _respuesta,
+                _respuesta.isEmpty
+                    ? "Haz una pregunta a la IA 👇"
+                    : _respuesta,
                 style: const TextStyle(fontSize: 16),
               ),
             ),
@@ -84,7 +102,22 @@ class _IntelligenceSchoolScreenState extends State<IntelligenceSchoolScreen> {
     );
   }
 
-  // 🧩 Construcción del Scaffold principal
+  // 🔹 Selección de pantallas según el índice del BottomNavigationBar
+  Widget _getSelectedPage() {
+    switch (_currentIndex) {
+      case 0:
+        return _buildIATestPage(); // IA// ✅ Nuevo Dashboard
+      case 1:
+        return const CrudScreen(); // CRUD de usuarios (detallado)
+      case 2:
+        return const MateriasScreen(); // Materias
+      case 3:
+        return const GestionUsuariosScreen();  // Asignar materia
+      default:
+        return const Center(child: Text("Sección desconocida"));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,12 +129,17 @@ class _IntelligenceSchoolScreenState extends State<IntelligenceSchoolScreen> {
           height: 250,
         ),
       ),
-      body: _pages[_currentIndex],
+      body: _getSelectedPage(),
       bottomNavigationBar: AdminBottomNav(
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.psychology), label: "IATest"),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: "Usuarios"),
-          BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: "Materias"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.psychology), label: "IA"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.people), label: "Usuarios"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.menu_book), label: "Materias"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit_outlined), label: "Gestor"),
         ],
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),

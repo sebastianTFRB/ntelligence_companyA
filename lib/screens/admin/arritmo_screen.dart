@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../../widgets/project_selector_appbar.dart';
 import '../../widgets/admin_bottom_nav.dart';
 import '../../services/arritmo_api.dart';
@@ -6,7 +10,6 @@ import '../../services/arritmo_api.dart';
 // 🔹 Importamos las nuevas pantallas
 import '../Arritmo/casos_simulados_screen.dart';
 import '../Arritmo/instrucciones_contexto_screen.dart';
-
 
 class ArritmoScreen extends StatefulWidget {
   const ArritmoScreen({super.key});
@@ -20,6 +23,7 @@ class _ArritmoScreenState extends State<ArritmoScreen> {
   final TextEditingController _controller = TextEditingController();
   String _respuesta = "";
   bool _cargando = false;
+  final AudioPlayer _audioPlayer = AudioPlayer(); // Reutilizamos un solo AudioPlayer
 
   Future<void> _enviarPregunta() async {
     final pregunta = _controller.text.trim();
@@ -32,12 +36,28 @@ class _ArritmoScreenState extends State<ArritmoScreen> {
       setState(() => _respuesta = data["respuesta"] ?? "Sin respuesta");
 
       if (data["audio"] != null) {
-        await ArritmoApi.reproducirAudio(data["audio"]);
+        await _reproducirAudioBase64(data["audio"]);
       }
     } catch (e) {
       setState(() => _respuesta = "❌ Error: $e");
     } finally {
       setState(() => _cargando = false);
+    }
+  }
+
+  /// 🔹 Reproducir audio desde Base64 (iOS + Android)
+  Future<void> _reproducirAudioBase64(String base64Audio) async {
+    try {
+      final bytes = base64Decode(base64Audio);
+
+      // Guardar en archivo temporal
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/arritmo_audio.wav');
+      await file.writeAsBytes(bytes, flush: true);
+
+      await _audioPlayer.play(DeviceFileSource(file.path));
+    } catch (e) {
+      debugPrint("Error reproduciendo audio: $e");
     }
   }
 
@@ -93,6 +113,13 @@ class _ArritmoScreenState extends State<ArritmoScreen> {
       default:
         return const Center(child: Text("Sección desconocida"));
     }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _audioPlayer.dispose(); // Liberar recursos del audioPlayer
+    super.dispose();
   }
 
   @override
