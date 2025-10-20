@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/instrucciones.dart';
+import 'package:intelligence_company_ia/models/instrucciones.dart';
 
 Future<void> showCrudForm({
   required BuildContext context,

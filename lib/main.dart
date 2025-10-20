@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
-import 'package:intelligence_company_ia/screens/inteligenceschool/asignar_materia_screen.dart';
+import 'package:intelligence_company_ia/auth/register_screen.dart';
+
 import 'package:intelligence_company_ia/screens/profesor/CrudMateriasScreen.dart';
 import 'auth/login_screen.dart';
 import 'screens/admin/admin_home.dart';
@@ -41,10 +42,11 @@ class IntelligenceSchoolApp extends StatelessWidget {
         "/admin_home": (context) => AdminScreen(),
         "/splash": (context) => const SplashScreen(),
         "/profile": (context) => ProfileScreen(),
+        "/register": (context) => RegisterScreen(),
         "/admin_home_intelligence": (context) => const IntelligenceSchoolScreen(),
         "/admin_home_arritmo": (context) => const ArritmoScreen(),
         "/admin_home_recorrido": (context) => const RecorridoScreen(),
-        '/asignar_materia': (context) => const AsignarMateriaScreen(), 
+        
         '/crudmaterias': (context) {
          final user = ModalRoute.of(context)!.settings.arguments as AppUser;
          return CrudMateriasScreen(user: user);

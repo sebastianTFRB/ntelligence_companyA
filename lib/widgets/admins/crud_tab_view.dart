@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/instrucciones.dart';
-import 'crud_list_widget.dart';
-import 'crud_form_dialog.dart';
+import 'package:intelligence_company_ia/widgets/admins/crud_form_dialog.dart';
+import 'package:intelligence_company_ia/widgets/admins/crud_list_widget.dart';
+import '../../models/instrucciones.dart';
+
 import 'crud_confirm_delete.dart';
 
 class CrudTabView extends StatefulWidget {

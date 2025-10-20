@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intelligence_company_ia/widgets/admins/crud_form_dialog.dart';
 import '../../models/instrucciones.dart';
 import '../../services/arritmo_api.dart';
-import '../../widgets/crud_tab_view.dart';
-import '../../widgets/crud_form_dialog.dart';
+import '../../widgets/admins/crud_tab_view.dart';
+
 
 class CrudArritmoScreen extends StatefulWidget {
   const CrudArritmoScreen({super.key});

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/instrucciones.dart';
+import 'package:intelligence_company_ia/models/instrucciones.dart';
 
 class CrudListWidget extends StatelessWidget {
   final Future<List<Instruccion>> future;

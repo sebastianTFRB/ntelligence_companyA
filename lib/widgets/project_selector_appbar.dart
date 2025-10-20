@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intelligence_company_ia/widgets/perfil_menu.dart';
 import 'project_selector_menu.dart';
 
 /// AppBar con título centrado, efecto de animación al pulsar,
@@ -79,8 +80,19 @@ class ProjectSelectorAppBar extends StatelessWidget
                 padding: const EdgeInsets.only(right: 20),
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, "/perfil");
-                  },
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => const Align(
+                            alignment: Alignment.centerRight,
+                            child: SizedBox(
+                              width: 280,
+                              child: PerfilMenu(),
+                            ),
+                          ),
+                        );
+                      },
                   child: CircleAvatar(
                     radius: 22,
                     backgroundColor: Colors.white,
