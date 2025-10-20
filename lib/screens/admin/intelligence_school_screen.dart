@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:intelligence_company_ia/screens/inteligenceschool/crud_grupos_screen.dart';
 import 'package:intelligence_company_ia/screens/inteligenceschool/gestion_usuarios_screen.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -11,7 +12,7 @@ import '../../services/intelligence_api.dart';
 
 // 🔹 Pantallas del módulo IntelligenceSchool
 import '../inteligenceschool/crud_screen.dart';
-import '../inteligenceschool/materias_screen.dart';
+
 
  // ✅ NUEVA pantalla
 
@@ -110,7 +111,7 @@ class _IntelligenceSchoolScreenState extends State<IntelligenceSchoolScreen> {
       case 1:
         return const CrudScreen(); // CRUD de usuarios (detallado)
       case 2:
-        return const MateriasScreen(); // Materias
+        return const CrudGruposScreen(); // Materias
       case 3:
         return const GestionUsuariosScreen();  // Asignar materia
       default:
@@ -137,7 +138,7 @@ class _IntelligenceSchoolScreenState extends State<IntelligenceSchoolScreen> {
           BottomNavigationBarItem(
               icon: Icon(Icons.people), label: "Usuarios"),
           BottomNavigationBarItem(
-              icon: Icon(Icons.menu_book), label: "Materias"),
+              icon: Icon(Icons.group_add_sharp), label: "Grupos"),
           BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit_outlined), label: "Gestor"),
         ],

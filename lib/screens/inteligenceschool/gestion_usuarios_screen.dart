@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intelligence_company_ia/widgets/inteligence%20school/agregar_usuario_widget.dart';
-import 'package:intelligence_company_ia/widgets/inteligence%20school/asignar_materia_widget.dart';
 import 'package:intelligence_company_ia/widgets/inteligence%20school/listar_usuarios_widget.dart';
-
+import 'package:intelligence_company_ia/widgets/inteligence%20school/asignar_estudiante_widget.dart';
+import 'package:intelligence_company_ia/widgets/inteligence%20school/asignar_profesor_widget.dart';
 
 class GestionUsuariosScreen extends StatefulWidget {
   const GestionUsuariosScreen({super.key});
@@ -20,7 +20,7 @@ class _GestionUsuariosScreenState extends State<GestionUsuariosScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this); // 🔹 ahora 4 tabs
   }
 
   Future<void> _eliminarUsuario(String uid) async {
@@ -40,15 +40,17 @@ class _GestionUsuariosScreenState extends State<GestionUsuariosScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Gestión de Usuarios y Materias"),
+        title: const Text("Gestión de Usuarios y Asignaciones"),
         backgroundColor: Colors.deepPurple,
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.white,
+          indicatorColor: const Color.fromARGB(255, 255, 251, 5),
+          isScrollable: true,
           tabs: const [
             Tab(icon: Icon(Icons.person_add), text: "Agregar Usuario"),
             Tab(icon: Icon(Icons.list_alt), text: "Listar Usuarios"),
-            Tab(icon: Icon(Icons.school), text: "Asignar Materia"),
+            Tab(icon: Icon(Icons.group_add), text: "Asignar Estudiante"),
+            Tab(icon: Icon(Icons.school), text: "Asignar Profesor"),
           ],
         ),
       ),
@@ -57,7 +59,8 @@ class _GestionUsuariosScreenState extends State<GestionUsuariosScreen>
         children: [
           AgregarUsuarioWidget(db: _db),
           ListarUsuariosWidget(db: _db, eliminarUsuario: _eliminarUsuario),
-          AsignarMateriaWidget(db: _db),
+          AsignarEstudianteWidget(db: _db),
+          AsignarProfesorWidget(db: _db),
         ],
       ),
     );

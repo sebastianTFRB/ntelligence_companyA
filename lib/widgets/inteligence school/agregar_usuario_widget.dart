@@ -12,10 +12,9 @@ class AgregarUsuarioWidget extends StatefulWidget {
 
 class _AgregarUsuarioWidgetState extends State<AgregarUsuarioWidget> {
   final _formKey = GlobalKey<FormState>();
+  final _nombreController = TextEditingController();
   final _emailController = TextEditingController();
   final _docController = TextEditingController();
-  final _gradoController = TextEditingController();
-  String _grupoSeleccionado = 'A';
   String _roleSeleccionado = 'estudiante';
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -24,6 +23,7 @@ class _AgregarUsuarioWidgetState extends State<AgregarUsuarioWidget> {
     if (!_formKey.currentState!.validate()) return;
 
     try {
+      final nombre = _nombreController.text.trim();
       final email = _emailController.text.trim();
       final contrasena = _docController.text.trim().isEmpty
           ? email.split('@')[0]
@@ -38,14 +38,10 @@ class _AgregarUsuarioWidgetState extends State<AgregarUsuarioWidget> {
       // 👉 2. Preparar datos para Firestore
       final Map<String, dynamic> userData = {
         'uid': cred.user!.uid,
+        'nombre': nombre,
         'email': email,
         'role': _roleSeleccionado,
       };
-
-      if (_roleSeleccionado == 'estudiante') {
-        userData['grado'] = _gradoController.text.trim();
-        userData['grupo'] = _grupoSeleccionado;
-      }
 
       // 👉 3. Guardar en Firestore (con uid como ID del documento)
       await widget.db.collection('users').doc(cred.user!.uid).set(userData);
@@ -58,12 +54,11 @@ class _AgregarUsuarioWidgetState extends State<AgregarUsuarioWidget> {
       );
 
       // 👉 4. Limpiar campos
+      _nombreController.clear();
       _emailController.clear();
       _docController.clear();
-      _gradoController.clear();
       setState(() {
         _roleSeleccionado = 'estudiante';
-        _grupoSeleccionado = 'A';
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -84,6 +79,21 @@ class _AgregarUsuarioWidgetState extends State<AgregarUsuarioWidget> {
             const Text(
               "Registrar nuevo usuario",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+
+            // Nombre completo
+            TextFormField(
+              controller: _nombreController,
+              decoration: const InputDecoration(
+                labelText: "Nombre completo",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.person_outline),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) return "Ingresa un nombre";
+                return null;
+              },
             ),
             const SizedBox(height: 20),
 
@@ -133,44 +143,7 @@ class _AgregarUsuarioWidgetState extends State<AgregarUsuarioWidget> {
                 });
               },
             ),
-            const SizedBox(height: 20),
-
-            if (_roleSeleccionado == 'estudiante') ...[
-              TextFormField(
-                controller: _gradoController,
-                decoration: const InputDecoration(
-                  labelText: "Grado",
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.school),
-                ),
-                validator: (value) {
-                  if (_roleSeleccionado == 'estudiante' &&
-                      (value == null || value.isEmpty)) {
-                    return "Ingresa el grado";
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              DropdownButtonFormField<String>(
-                value: _grupoSeleccionado,
-                decoration: const InputDecoration(
-                  labelText: "Grupo",
-                  border: OutlineInputBorder(),
-                ),
-                items: const [
-                  DropdownMenuItem(value: "A", child: Text("A")),
-                  DropdownMenuItem(value: "B", child: Text("B")),
-                  DropdownMenuItem(value: "C", child: Text("C")),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    _grupoSeleccionado = value!;
-                  });
-                },
-              ),
-              const SizedBox(height: 20),
-            ],
+            const SizedBox(height: 30),
 
             ElevatedButton.icon(
               onPressed: _crearUsuario,
