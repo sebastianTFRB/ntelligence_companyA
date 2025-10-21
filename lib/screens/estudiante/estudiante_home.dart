@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../models/users_model.dart';
-import '../../models/inteligenceshool/materia_model.dart';
-import '../../widgets/inteligence school/materia_card.dart';
+import '../../../models/users_model.dart';
+import '../../../models/inteligenceshool/materia_model.dart';
+import '../../../widgets/inteligence school/materia_card.dart';
 
 class EstudianteHome extends StatelessWidget {
-  final AppUser user; // Recibe el usuario
+  final AppUser user;
+
   const EstudianteHome({super.key, required this.user});
 
   @override
@@ -28,11 +29,11 @@ class EstudianteHome extends StatelessWidget {
           ),
         ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _db
-            .collection('asignaciones')
+      body: FutureBuilder<QuerySnapshot>(
+        future: _db
+            .collection('asignaciones_estudiantes')
             .where('estudianteId', isEqualTo: user.uid)
-            .snapshots(),
+            .get(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -41,42 +42,81 @@ class EstudianteHome extends StatelessWidget {
             return Center(child: Text("Error: ${snapshot.error}"));
           }
 
-          final asignaciones = snapshot.data?.docs ?? [];
-          if (asignaciones.isEmpty) {
+          final asignacionesEst = snapshot.data?.docs ?? [];
+          if (asignacionesEst.isEmpty) {
             return const Center(
               child: Text(
-                "No estás inscrito en ninguna materia aún.",
+                "No estás asignado a ningún grupo aún.",
                 style: TextStyle(fontSize: 18, color: Colors.grey),
               ),
             );
           }
 
-          // Obtener todos los IDs de materias asignadas
-          final materiaIds =
-              asignaciones.map((doc) => doc['materiaId'] as String).toList();
+          // Obtenemos todos los grupos del estudiante
+          final grupoIds = asignacionesEst
+              .map((doc) => doc['grupoId'] as String)
+              .toSet()
+              .toList();
 
-          // Stream de materias
-          return StreamBuilder<QuerySnapshot>(
-            stream: _db
-                .collection('materias')
-                .where(FieldPath.documentId, whereIn: materiaIds)
-                .snapshots(),
+          // Ahora obtenemos todas las materias asignadas a esos grupos
+          return FutureBuilder<QuerySnapshot>(
+            future: _db
+                .collection('asignaciones_profesores')
+                .where('grupoId', whereIn: grupoIds)
+                .get(),
             builder: (context, materiasSnap) {
-              if (!materiasSnap.hasData) {
+              if (materiasSnap.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
+              if (materiasSnap.hasError) {
+                return Center(child: Text("Error: ${materiasSnap.error}"));
+              }
 
-              final materiasDocs = materiasSnap.data!.docs;
-              final materias = materiasDocs
-                  .map((d) =>
-                      Materia.fromMap(d.data() as Map<String, dynamic>, d.id))
+              final asignacionesProfes = materiasSnap.data?.docs ?? [];
+              if (asignacionesProfes.isEmpty) {
+                return const Center(
+                  child: Text(
+                    "No hay materias asignadas a tu grupo aún.",
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                );
+              }
+
+              // Obtenemos los IDs de materias
+              final materiaIds = asignacionesProfes
+                  .map((doc) => doc['materiaId'] as String)
+                  .toSet()
                   .toList();
 
-              return ListView.builder(
-                padding: const EdgeInsets.all(10),
-                itemCount: materias.length,
-                itemBuilder: (context, index) =>
-                    MateriaCard(materia: materias[index]),
+              // Finalmente obtenemos los documentos de materias
+              return FutureBuilder<QuerySnapshot>(
+                future: _db
+                    .collection('materias')
+                    .where(FieldPath.documentId, whereIn: materiaIds)
+                    .get(),
+                builder: (context, materiasDocsSnap) {
+                  if (materiasDocsSnap.connectionState ==
+                      ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (materiasDocsSnap.hasError) {
+                    return Center(
+                        child: Text("Error: ${materiasDocsSnap.error}"));
+                  }
+
+                  final materiasDocs = materiasDocsSnap.data?.docs ?? [];
+                  final materias = materiasDocs
+                      .map((d) =>
+                          Materia.fromMap(d.data() as Map<String, dynamic>, d.id))
+                      .toList();
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(10),
+                    itemCount: materias.length,
+                    itemBuilder: (context, index) =>
+                        MateriaCard(materia: materias[index]),
+                  );
+                },
               );
             },
           );
