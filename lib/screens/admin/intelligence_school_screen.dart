@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intelligence_company_ia/screens/inteligenceschool/crud_grupos_screen.dart';
 import 'package:intelligence_company_ia/screens/inteligenceschool/gestion_usuarios_screen.dart';
+import 'package:intelligence_company_ia/screens/inteligenceschool/materias_crud_screen.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:audioplayers/audioplayers.dart';
 
@@ -113,7 +114,9 @@ class _IntelligenceSchoolScreenState extends State<IntelligenceSchoolScreen> {
       case 2:
         return const CrudGruposScreen(); // Materias
       case 3:
-        return const GestionUsuariosScreen();  // Asignar materia
+        return const GestionUsuariosScreen(); 
+      case 4:
+        return const MateriasCrudScreen(); // Asignar materia
       default:
         return const Center(child: Text("Sección desconocida"));
     }
@@ -141,6 +144,8 @@ class _IntelligenceSchoolScreenState extends State<IntelligenceSchoolScreen> {
               icon: Icon(Icons.group_add_sharp), label: "Grupos"),
           BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit_outlined), label: "Gestor"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.man_outlined), label: "Materias"),
         ],
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),

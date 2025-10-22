@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import '../../../models/users_model.dart';
 import '../../../models/inteligenceshool/materia_model.dart';
 import '../../../widgets/inteligence school/materia_card.dart';
@@ -22,6 +21,7 @@ class EstudianteHome extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
+            tooltip: "Cerrar sesión",
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
               Navigator.pushReplacementNamed(context, "/login");
@@ -52,16 +52,14 @@ class EstudianteHome extends StatelessWidget {
             );
           }
 
-          // Obtenemos todos los grupos del estudiante
           final grupoIds = asignacionesEst
               .map((doc) => doc['grupoId'] as String)
               .toSet()
               .toList();
 
-          // Ahora obtenemos todas las materias asignadas a esos grupos
           return FutureBuilder<QuerySnapshot>(
             future: _db
-                .collection('asignaciones_profesores')
+                .collection('materias')
                 .where('grupoId', whereIn: grupoIds)
                 .get(),
             builder: (context, materiasSnap) {
@@ -72,50 +70,27 @@ class EstudianteHome extends StatelessWidget {
                 return Center(child: Text("Error: ${materiasSnap.error}"));
               }
 
-              final asignacionesProfes = materiasSnap.data?.docs ?? [];
-              if (asignacionesProfes.isEmpty) {
+              final materiasDocs = materiasSnap.data?.docs ?? [];
+              if (materiasDocs.isEmpty) {
                 return const Center(
                   child: Text(
-                    "No hay materias asignadas a tu grupo aún.",
+                    "Aún no hay materias asignadas a tu grupo.",
                     style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
                 );
               }
 
-              // Obtenemos los IDs de materias
-              final materiaIds = asignacionesProfes
-                  .map((doc) => doc['materiaId'] as String)
-                  .toSet()
-                  .toList();
+              final materias = materiasDocs.map((d) {
+                final data = d.data() as Map<String, dynamic>;
+                return Materia.fromMap(data, d.id);
+              }).toList();
 
-              // Finalmente obtenemos los documentos de materias
-              return FutureBuilder<QuerySnapshot>(
-                future: _db
-                    .collection('materias')
-                    .where(FieldPath.documentId, whereIn: materiaIds)
-                    .get(),
-                builder: (context, materiasDocsSnap) {
-                  if (materiasDocsSnap.connectionState ==
-                      ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (materiasDocsSnap.hasError) {
-                    return Center(
-                        child: Text("Error: ${materiasDocsSnap.error}"));
-                  }
-
-                  final materiasDocs = materiasDocsSnap.data?.docs ?? [];
-                  final materias = materiasDocs
-                      .map((d) =>
-                          Materia.fromMap(d.data() as Map<String, dynamic>, d.id))
-                      .toList();
-
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(10),
-                    itemCount: materias.length,
-                    itemBuilder: (context, index) =>
-                        MateriaCard(materia: materias[index]),
-                  );
+              return ListView.builder(
+                padding: const EdgeInsets.all(10),
+                itemCount: materias.length,
+                itemBuilder: (context, index) {
+                  final materia = materias[index];
+                  return MateriaCard(materia: materia);
                 },
               );
             },

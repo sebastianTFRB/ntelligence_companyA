@@ -1,50 +1,70 @@
 import 'package:flutter/material.dart';
-import '../../models/inteligenceshool/materia_model.dart';
+import 'package:intelligence_company_ia/screens/estudiante/estudiante_materia_screen.dart';
+import '../../../models/inteligenceshool/materia_model.dart';
 
 class MateriaCard extends StatelessWidget {
   final Materia materia;
-  final VoidCallback? onTap;
 
-  const MateriaCard({
-    super.key,
-    required this.materia,
-    this.onTap,
-  });
+  const MateriaCard({super.key, required this.materia});
+
+  // 🔹 Map con estilos según materia genérica
+  Map<String, dynamic> _getEstilo(String materiaGenerica) {
+    switch (materiaGenerica.toLowerCase()) {
+      case 'sociales':
+        return {
+          "colorPrincipal": Colors.deepPurple,
+          "colorSecundario": Colors.purple[100],
+          "icono": Icons.public
+        };
+      case 'quimica':
+        return {
+          "colorPrincipal": Colors.green[800],
+          "colorSecundario": Colors.green[100],
+          "icono": Icons.science
+        };
+      case 'matematicas':
+        return {
+          "colorPrincipal": Colors.blue[800],
+          "colorSecundario": Colors.blue[100],
+          "icono": Icons.calculate
+        };
+      default:
+        return {
+          "colorPrincipal": Colors.grey[800],
+          "colorSecundario": Colors.grey[200],
+          "icono": Icons.school
+        };
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final estilo = _getEstilo(materia.materiaGenericaNombre);
+
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      color: estilo["colorSecundario"],
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap ??
-            () {
-              Navigator.pushNamed(
-                context,
-                '/materiaDetalle',
-                arguments: materia,
-              );
-            },
+        borderRadius: BorderRadius.circular(15),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  EstudianteMateriaScreen(materiaId: materia.id),
+            ),
+          );
+        },
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.deepPurple[100],
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.book,
-                  color: Colors.deepPurple,
-                  size: 28,
-                ),
+              CircleAvatar(
+                radius: 25,
+                backgroundColor: estilo["colorPrincipal"],
+                child: Icon(estilo["icono"], color: Colors.white),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -54,30 +74,33 @@ class MateriaCard extends StatelessWidget {
                     Text(
                       materia.nombre,
                       style: const TextStyle(
-                        fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        fontSize: 18,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Text(
-                      "Grado: ${materia.grado}",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
-                      ),
+                      "Profesor: ${materia.profesorNombre}",
+                      style: const TextStyle(color: Colors.black87, fontSize: 14),
                     ),
                     Text(
-                      "Grupo: ${materia.grupo}",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
-                      ),
+                      "Grupo: ${materia.grupoNombre}",
+                      style: const TextStyle(color: Colors.black54, fontSize: 13),
                     ),
+                    if (materia.descripcion.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          materia.descripcion,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.black54),
+                        ),
+                      ),
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios, color: Colors.deepPurple),
+              const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.indigo),
             ],
           ),
         ),

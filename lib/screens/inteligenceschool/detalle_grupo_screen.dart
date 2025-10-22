@@ -47,7 +47,7 @@ class _DetalleGrupoScreenState extends State<DetalleGrupoScreen> {
                   const SizedBox(height: 30),
                   _buildSectionTitle("📚 Materias y profesores"),
                   const SizedBox(height: 10),
-                  _buildMateriasList(),
+                  _buildMateriasList(), // ✅ corregido sin descripción
                   const SizedBox(height: 40),
                   Center(
                     child: GestureDetector(
@@ -212,76 +212,57 @@ class _DetalleGrupoScreenState extends State<DetalleGrupoScreen> {
     );
   }
 
-  // 🔹 Lista de materias
+  // ✅ 🔹 Lista de materias sin descripción
   Widget _buildMateriasList() {
     return StreamBuilder<QuerySnapshot>(
       stream: _db
-          .collection('asignaciones_profesores')
+          .collection('materias')
           .where('grupoId', isEqualTo: widget.grupoId)
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-        final asignaciones = snapshot.data!.docs;
+        final materias = snapshot.data!.docs;
 
-        if (asignaciones.isEmpty) {
+        if (materias.isEmpty) {
           return _emptyMessage("No hay materias asignadas a este grupo.");
         }
 
         return Column(
-          children: asignaciones.map((doc) {
+          children: materias.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
-            final profesorId = data['profesorId'];
-            final materiaId = data['materiaId'];
+            final materiaNombre = data['nombre'] ?? 'Sin nombre';
+            final profesorNombre = data['profesorNombre'] ?? 'Desconocido';
 
-            return FutureBuilder<List<DocumentSnapshot>>(
-              future: Future.wait([
-                _db.collection('users').doc(profesorId).get(),
-                _db.collection('materias').doc(materiaId).get(),
-              ]),
-              builder: (context, snap) {
-                if (!snap.hasData) {
-                  return const ListTile(title: Text("Cargando materia..."));
-                }
-
-                final profesorData = snap.data![0].data() as Map<String, dynamic>?;
-                final materiaData = snap.data![1].data() as Map<String, dynamic>?;
-
-                final profesorNombre = profesorData?['nombre'] ?? 'Desconocido';
-                final materiaNombre = materiaData?['nombre'] ?? 'Sin nombre';
-
-                return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 6),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        primaryColor.withOpacity(0.12),
-                        Colors.white,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.15),
-                        blurRadius: 6,
-                        offset: const Offset(2, 3),
-                      ),
-                    ],
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [primaryColor.withOpacity(0.12), Colors.white],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.15),
+                    blurRadius: 6,
+                    offset: const Offset(2, 3),
                   ),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: primaryColor,
-                      child: const Icon(Icons.book, color: Colors.white),
-                    ),
-                    title: Text(materiaNombre,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 16)),
-                    subtitle: Text("Profesor: $profesorNombre",
-                        style: TextStyle(color: Colors.grey[700])),
-                  ),
-                );
-              },
+                ],
+              ),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: primaryColor,
+                  child: const Icon(Icons.menu_book, color: Colors.white),
+                ),
+                title: Text(
+                  materiaNombre,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 16),
+                ),
+                subtitle: Text("Profesor: $profesorNombre",
+                    style: TextStyle(color: Colors.grey[700])),
+              ),
             );
           }).toList(),
         );
