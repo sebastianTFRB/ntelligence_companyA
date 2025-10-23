@@ -1,80 +1,73 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intelligence_company_ia/models/inteligenceshool/disingMateriasScreen/materia_bloque.dart';
+import 'package:intelligence_company_ia/services/inteligence/materia_service.dart';
 
-class EstudianteMateriaScreen extends StatelessWidget {
+
+class EstudianteMateriaScreen extends StatefulWidget {
   final String materiaId;
   const EstudianteMateriaScreen({super.key, required this.materiaId});
 
-  Future<Map<String, dynamic>?> _obtenerMateria() async {
-    final doc = await FirebaseFirestore.instance
-        .collection('materias')
-        .doc(materiaId)
-        .get();
-    if (!doc.exists) return null;
-    return doc.data();
+  @override
+  State<EstudianteMateriaScreen> createState() => _EstudianteMateriaScreenState();
+}
+
+class _EstudianteMateriaScreenState extends State<EstudianteMateriaScreen> {
+  final MateriaService _service = MateriaService();
+  List<MateriaBloque> bloques = [];
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
   }
 
-  Color _getColorFondo(String materiaGenerica) {
-    switch (materiaGenerica.toLowerCase()) {
-      case 'sociales':
-        return Colors.purple[50]!;
-      case 'quimica':
-        return Colors.green[50]!;
-      case 'matematicas':
-        return Colors.blue[50]!;
+  Future<void> _load() async {
+    setState(() => loading = true);
+    bloques = await _service.fetchBloques(widget.materiaId);
+    setState(() => loading = false);
+  }
+
+  Widget _renderBloque(MateriaBloque b) {
+    switch (b.tipo) {
+      case 'titulo':
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(b.contenido ?? '', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+        );
+      case 'subtitulo':
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Text(b.contenido ?? '', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+        );
+      case 'texto':
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Text(b.contenido ?? '', style: const TextStyle(fontSize: 16, height: 1.4)),
+        );
+      case 'imagen':
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: b.url != null ? Image.network(b.url!) : const SizedBox.shrink(),
+        );
       default:
-        return Colors.grey[100]!;
+        return const SizedBox.shrink();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Materia"),
-        backgroundColor: Colors.deepPurple,
-      ),
-      body: FutureBuilder<Map<String, dynamic>?>(
-        future: _obtenerMateria(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(child: Text("Materia no encontrada"));
-          }
-
-          final materia = snapshot.data!;
-          final colorFondo =
-              _getColorFondo(materia['materiaGenericaNombre'] ?? '');
-
-          return Container(
-            color: colorFondo,
-            padding: const EdgeInsets.all(16),
-            child: ListView(
-              children: [
-                Text(
-                  materia['nombre'] ?? '',
-                  style: const TextStyle(
-                      fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "${materia['grupoNombre'] ?? ''} - Prof. ${materia['profesorNombre'] ?? ''}",
-                  style: const TextStyle(color: Colors.grey, fontSize: 16),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  materia['descripcion']?.isNotEmpty == true
-                      ? materia['descripcion']
-                      : 'Sin descripción disponible.',
-                  style: const TextStyle(fontSize: 16, height: 1.4),
-                ),
-              ],
+      appBar: AppBar(title: const Text('Materia'), backgroundColor: Colors.deepPurple),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: bloques.map(_renderBloque).toList(),
+              ),
             ),
-          );
-        },
-      ),
     );
   }
 }

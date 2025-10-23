@@ -1,102 +1,84 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:intelligence_company_ia/screens/estudiante/materiasList.dart';
+import 'package:intelligence_company_ia/screens/estudiante/perfil_estudiante_screen.dart';
+import 'package:intelligence_company_ia/widgets/inteligence%20school/student/student_header.dart';
+
 import '../../../models/users_model.dart';
-import '../../../models/inteligenceshool/materia_model.dart';
-import '../../../widgets/inteligence school/materia_card.dart';
+ // ✅ (asegúrate de crear este archivo con StudentHeader)
+import '../../../widgets/admin_bottom_nav.dart'; // ✅ (asegúrate de crear este archivo con AdminBottomNav)
 
-class EstudianteHome extends StatelessWidget {
+class EstudianteHomeScreen extends StatefulWidget {
   final AppUser user;
+  const EstudianteHomeScreen({super.key, required this.user});
 
-  const EstudianteHome({super.key, required this.user});
+  @override
+  State<EstudianteHomeScreen> createState() => _EstudianteHomeScreenState();
+}
+
+class _EstudianteHomeScreenState extends State<EstudianteHomeScreen> {
+  final FirebaseFirestore _db = FirebaseFirestore.instance; // ✅ ahora sí definido correctamente
+  int _selectedIndex = 0;
+
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      Materiaslist(user: widget.user),
+      PerfilEstudianteScreen(user: widget.user),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
-    final FirebaseFirestore _db = FirebaseFirestore.instance;
+    final user = widget.user;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Bienvenido, ${user.email.split('@').first}"),
-        backgroundColor: Colors.indigo,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: "Cerrar sesión",
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              Navigator.pushReplacementNamed(context, "/login");
-            },
+      backgroundColor: Colors.grey[100],
+      body: Column(
+        children: [
+          // ✅ Encabezado con gradiente
+          StudentHeader(user: user),
+
+          // ✅ Contenido dinámico (pantallas)
+          Expanded(
+            child: _screens[_selectedIndex],
           ),
         ],
       ),
-      body: FutureBuilder<QuerySnapshot>(
-        future: _db
-            .collection('asignaciones_estudiantes')
-            .where('estudianteId', isEqualTo: user.uid)
-            .get(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          }
 
-          final asignacionesEst = snapshot.data?.docs ?? [];
-          if (asignacionesEst.isEmpty) {
-            return const Center(
-              child: Text(
-                "No estás asignado a ningún grupo aún.",
-                style: TextStyle(fontSize: 18, color: Colors.grey),
-              ),
-            );
-          }
-
-          final grupoIds = asignacionesEst
-              .map((doc) => doc['grupoId'] as String)
-              .toSet()
-              .toList();
-
-          return FutureBuilder<QuerySnapshot>(
-            future: _db
-                .collection('materias')
-                .where('grupoId', whereIn: grupoIds)
-                .get(),
-            builder: (context, materiasSnap) {
-              if (materiasSnap.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (materiasSnap.hasError) {
-                return Center(child: Text("Error: ${materiasSnap.error}"));
-              }
-
-              final materiasDocs = materiasSnap.data?.docs ?? [];
-              if (materiasDocs.isEmpty) {
-                return const Center(
-                  child: Text(
-                    "Aún no hay materias asignadas a tu grupo.",
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
-                  ),
-                );
-              }
-
-              final materias = materiasDocs.map((d) {
-                final data = d.data() as Map<String, dynamic>;
-                return Materia.fromMap(data, d.id);
-              }).toList();
-
-              return ListView.builder(
-                padding: const EdgeInsets.all(10),
-                itemCount: materias.length,
-                itemBuilder: (context, index) {
-                  final materia = materias[index];
-                  return MateriaCard(materia: materia);
-                },
-              );
-            },
-          );
-        },
+      // ✅ Barra inferior personalizada
+      bottomNavigationBar: AdminBottomNav(
+        currentIndex: _selectedIndex,
+        onTap: (i) => setState(() => _selectedIndex = i),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.menu_book),
+            label: "Materias",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: "Perfil",
+          ),
+        ],
       ),
+
+      // ✅ Botón de cerrar sesión en la esquina superior derecha
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.redAccent,
+        onPressed: () async {
+          await FirebaseAuth.instance.signOut();
+          if (context.mounted) {
+            Navigator.pushReplacementNamed(context, "/login");
+          }
+        },
+        child: const Icon(Icons.logout),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 }

@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intelligence_company_ia/models/inteligenceshool/disingMateriasScreen/materia_bloque.dart';
+import 'package:intelligence_company_ia/services/inteligence/materia_service.dart';
 
 class ProfesorMateriaScreen extends StatefulWidget {
   final String materiaId;
@@ -10,96 +13,153 @@ class ProfesorMateriaScreen extends StatefulWidget {
 }
 
 class _ProfesorMateriaScreenState extends State<ProfesorMateriaScreen> {
-  final _descripcionController = TextEditingController();
-  bool _isSaving = false;
+  final MateriaService _service = MateriaService();
+  List<MateriaBloque> bloques = [];
+  bool loading = true;
 
-  Future<Map<String, dynamic>?> _obtenerMateria() async {
-    final doc = await FirebaseFirestore.instance
-        .collection('materias')
-        .doc(widget.materiaId)
-        .get();
-    if (!doc.exists) return null;
-    return doc.data();
+  @override
+  void initState() {
+    super.initState();
+    _load();
   }
 
-  Future<void> _guardarCambios() async {
-    setState(() => _isSaving = true);
+  Future<void> _load() async {
+    setState(() => loading = true);
     try {
-      await FirebaseFirestore.instance
-          .collection('materias')
-          .doc(widget.materiaId)
-          .update({'descripcion': _descripcionController.text});
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Cambios guardados con éxito ✅")),
-      );
+      bloques = await _service.fetchBloques(widget.materiaId);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error al guardar: $e")),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
-      setState(() => _isSaving = false);
+      setState(() => loading = false);
     }
+  }
+
+  Future<void> _addBloqueSimple(String tipo) async {
+    final siguienteOrden = bloques.isEmpty ? 0 : (bloques.map((b) => b.orden).reduce((a, b) => a > b ? a : b) + 1);
+    if (tipo == 'imagen') {
+      final picker = ImagePicker();
+      final XFile? picked = await picker.pickImage(source: ImageSource.gallery);
+      if (picked == null) return;
+      final file = File(picked.path);
+      final url = await _service.uploadImageFile(file, widget.materiaId);
+      await _service.createBloque(materiaId: widget.materiaId, tipo: 'imagen', url: url, orden: siguienteOrden);
+    } else {
+      // abrir dialog para ingresar contenido
+      final result = await showDialog<String>(
+        context: context,
+        builder: (context) {
+          final ctrl = TextEditingController();
+          return AlertDialog(
+            title: Text('Nuevo ${tipo == 'titulo' ? 'Título' : tipo == 'subtitulo' ? 'Subtítulo' : 'Texto'}'),
+            content: TextField(controller: ctrl, maxLines: tipo == 'texto' ? 5 : 1),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+              ElevatedButton(onPressed: () => Navigator.pop(context, ctrl.text), child: const Text('Agregar'))
+            ],
+          );
+        },
+      );
+      if (result != null && result.trim().isNotEmpty) {
+        await _service.createBloque(materiaId: widget.materiaId, tipo: tipo, contenido: result.trim(), orden: siguienteOrden);
+      }
+    }
+    await _load();
+  }
+
+  Future<void> _delete(String id) async {
+    await _service.deleteBloque(id);
+    await _load();
+  }
+
+  Future<void> _onReorder(int oldIndex, int newIndex) async {
+    if (newIndex > oldIndex) newIndex -= 1;
+    final item = bloques.removeAt(oldIndex);
+    bloques.insert(newIndex, item);
+    // actualizar orden en memoria
+    for (var i = 0; i < bloques.length; i++) {
+      bloques[i] = MateriaBloque(
+        id: bloques[i].id,
+        materiaId: bloques[i].materiaId,
+        tipo: bloques[i].tipo,
+        contenido: bloques[i].contenido,
+        url: bloques[i].url,
+        orden: i,
+      );
+    }
+    // push a supabase
+    await _service.updateOrden(bloques);
+    setState(() {});
+  }
+
+  Widget _buildTile(MateriaBloque b) {
+    return ListTile(
+      key: ValueKey(b.id),
+      title: Text('${b.tipo.toUpperCase()} ${b.tipo != 'imagen' && (b.contenido?.length ?? 0) > 30 ? ' — ${b.contenido!.substring(0,30)}...' : ''}'),
+      leading: b.tipo == 'imagen' ? const Icon(Icons.image) : const Icon(Icons.text_fields),
+      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+        IconButton(icon: const Icon(Icons.edit), onPressed: () => _editBloque(b)),
+        IconButton(icon: const Icon(Icons.delete), onPressed: () => _delete(b.id)),
+      ]),
+    );
+  }
+
+  Future<void> _editBloque(MateriaBloque b) async {
+    if (b.tipo == 'imagen') {
+      // permitir reemplazar imagen
+      final picker = ImagePicker();
+      final XFile? picked = await picker.pickImage(source: ImageSource.gallery);
+      if (picked == null) return;
+      final url = await _service.uploadImageFile(File(picked.path), widget.materiaId);
+      await _service.updateBloque(b.id, {'url': url});
+    } else {
+      final ctrl = TextEditingController(text: b.contenido ?? '');
+      final res = await showDialog<String?>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text('Editar ${b.tipo}'),
+          content: TextField(controller: ctrl, maxLines: b.tipo == 'texto' ? 5 : 1),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+            ElevatedButton(onPressed: () => Navigator.pop(context, ctrl.text), child: const Text('Guardar'))
+          ],
+        ),
+      );
+      if (res != null) {
+        await _service.updateBloque(b.id, {'contenido': res});
+      }
+    }
+    await _load();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Editar Materia"),
+      appBar: AppBar(title: const Text('Constructor de Materia'), backgroundColor: Colors.deepPurple),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : ReorderableListView(
+              onReorder: _onReorder,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              children: bloques.map(_buildTile).toList(),
+            ),
+      floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.deepPurple,
-      ),
-      body: FutureBuilder<Map<String, dynamic>?>(
-        future: _obtenerMateria(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(child: Text("Materia no encontrada"));
-          }
-
-          final materia = snapshot.data!;
-          _descripcionController.text = materia['descripcion'] ?? '';
-
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ListView(
-              children: [
-                Text(
-                  materia['nombre'] ?? '',
-                  style: const TextStyle(
-                      fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  materia['grupoNombre'] ?? '',
-                  style: const TextStyle(color: Colors.grey, fontSize: 16),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _descripcionController,
-                  maxLines: 5,
-                  decoration: const InputDecoration(
-                    labelText: "Descripción de la materia",
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton.icon(
-                  onPressed: _isSaving ? null : _guardarCambios,
-                  icon: const Icon(Icons.save),
-                  label: _isSaving
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Guardar cambios"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    minimumSize: const Size(double.infinity, 48),
-                  ),
-                ),
-              ],
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (_) => SafeArea(
+              child: Wrap(
+                children: [
+                  ListTile(leading: const Icon(Icons.title), title: const Text('Título'), onTap: () { Navigator.pop(context); _addBloqueSimple('titulo'); }),
+                  ListTile(leading: const Icon(Icons.subtitles), title: const Text('Subtítulo'), onTap: () { Navigator.pop(context); _addBloqueSimple('subtitulo'); }),
+                  ListTile(leading: const Icon(Icons.text_fields), title: const Text('Texto'), onTap: () { Navigator.pop(context); _addBloqueSimple('texto'); }),
+                  ListTile(leading: const Icon(Icons.image), title: const Text('Imagen'), onTap: () { Navigator.pop(context); _addBloqueSimple('imagen'); }),
+                ],
+              ),
             ),
           );
         },
+        child: const Icon(Icons.add),
       ),
     );
   }
