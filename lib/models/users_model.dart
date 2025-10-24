@@ -2,11 +2,13 @@ class AppUser {
   final String uid;
   final String email;
   final String role;
+  final String nombre; // 👈 Nuevo campo
 
   AppUser({
     required this.uid,
     required this.email,
     required this.role,
+    required this.nombre,
   });
 
   // Crear objeto desde Firestore
@@ -15,6 +17,7 @@ class AppUser {
       uid: documentId,
       email: data['email'] ?? '',
       role: data['role'] ?? 'estudiante',
+      nombre: data['nombre'] ?? '', // 👈 nuevo campo
     );
   }
 
@@ -24,6 +27,7 @@ class AppUser {
       "uid": uid,
       "email": email,
       "role": role,
+      "nombre": nombre, // 👈 incluido en guardado
     };
   }
 }

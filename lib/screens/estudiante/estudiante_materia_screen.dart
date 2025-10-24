@@ -1,24 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:intelligence_company_ia/models/inteligenceshool/disingMateriasScreen/materia_bloque.dart';
 import 'package:intelligence_company_ia/services/inteligence/materia_service.dart';
+import 'package:intelligence_company_ia/widgets/inteligence school/student/materia_tabs.dart';
+import 'package:intelligence_company_ia/widgets/inteligence school/student/student_header.dart';
+import 'package:intelligence_company_ia/widgets/perfil_menu.dart';
 
+import '../../../models/users_model.dart';
 
 class EstudianteMateriaScreen extends StatefulWidget {
   final String materiaId;
-  const EstudianteMateriaScreen({super.key, required this.materiaId});
+  final AppUser user;
+
+  const EstudianteMateriaScreen({
+    super.key,
+    required this.materiaId,
+    required this.user,
+  });
 
   @override
   State<EstudianteMateriaScreen> createState() => _EstudianteMateriaScreenState();
 }
 
-class _EstudianteMateriaScreenState extends State<EstudianteMateriaScreen> {
+class _EstudianteMateriaScreenState extends State<EstudianteMateriaScreen>
+    with SingleTickerProviderStateMixin {
   final MateriaService _service = MateriaService();
   List<MateriaBloque> bloques = [];
   bool loading = true;
+  late TabController _tabController;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _load();
   }
 
@@ -33,17 +47,26 @@ class _EstudianteMateriaScreenState extends State<EstudianteMateriaScreen> {
       case 'titulo':
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Text(b.contenido ?? '', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+          child: Text(
+            b.contenido ?? '',
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          ),
         );
       case 'subtitulo':
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Text(b.contenido ?? '', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+          child: Text(
+            b.contenido ?? '',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          ),
         );
       case 'texto':
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Text(b.contenido ?? '', style: const TextStyle(fontSize: 16, height: 1.4)),
+          child: Text(
+            b.contenido ?? '',
+            style: const TextStyle(fontSize: 16, height: 1.4),
+          ),
         );
       case 'imagen':
         return Padding(
@@ -56,18 +79,33 @@ class _EstudianteMateriaScreenState extends State<EstudianteMateriaScreen> {
   }
 
   @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Materia'), backgroundColor: Colors.deepPurple),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: bloques.map(_renderBloque).toList(),
-              ),
-            ),
+      key: _scaffoldKey,
+      drawer: const PerfilMenu(),
+
+      // ✅ Encabezado reutilizado (sin texto “Hola”)
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(90),
+        child: StudentHeader(
+          user: widget.user,
+          onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
+        ),
+      ),
+
+      body: MateriaTabs(
+        tabController: _tabController,
+        loading: loading,
+        bloques: bloques,
+        renderBloque: _renderBloque,
+        materiaId: widget.materiaId,
+      ),
     );
   }
 }

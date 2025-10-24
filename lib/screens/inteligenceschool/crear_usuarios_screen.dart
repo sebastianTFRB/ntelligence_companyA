@@ -24,7 +24,8 @@ class _CrearUsuariosScreenState extends State<CrearUsuariosScreen> {
       final newUser = AppUser(
         uid: _uidController.text.trim(),
         email: _emailController.text.trim(),
-        role: _selectedRole,
+        role: _selectedRole, 
+        nombre: '',
       );
 
       await _db.collection('usuarios').doc(newUser.uid).set(newUser.toMap());

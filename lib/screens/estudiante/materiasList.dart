@@ -74,7 +74,7 @@ class Materiaslist extends StatelessWidget {
               itemCount: materias.length,
               itemBuilder: (context, index) {
                 final materia = materias[index];
-                return MateriaCard(materia: materia);
+                return MateriaCard(materia: materia, user: user);
               },
             );
           },

@@ -101,12 +101,18 @@ class IntelligenceSchoolApp extends StatelessWidget {
         }
 
         // Pantalla: Estudiante -> Ver Materia (solo lectura)
-        if (settings.name == '/estudiante_materia') {
-          final materiaId = settings.arguments as String;
-          return MaterialPageRoute(
-            builder: (_) => EstudianteMateriaScreen(materiaId: materiaId),
-          );
-        }
+       if (settings.name == '/estudiante_materia') {
+        final args = settings.arguments as Map<String, dynamic>;
+        final materiaId = args['materiaId'] as String;
+        final user = args['user'] as AppUser;
+
+        return MaterialPageRoute(
+          builder: (_) => EstudianteMateriaScreen(
+            materiaId: materiaId,
+            user: user,
+          ),
+        );
+      }
 
         return null; // Si la ruta no coincide
       },

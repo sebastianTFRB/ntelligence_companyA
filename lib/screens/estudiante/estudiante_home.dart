@@ -5,10 +5,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intelligence_company_ia/screens/estudiante/materiasList.dart';
 import 'package:intelligence_company_ia/screens/estudiante/perfil_estudiante_screen.dart';
 import 'package:intelligence_company_ia/widgets/inteligence%20school/student/student_header.dart';
+import 'package:intelligence_company_ia/widgets/perfil_menu.dart';
+
 
 import '../../../models/users_model.dart';
- // ✅ (asegúrate de crear este archivo con StudentHeader)
-import '../../../widgets/admin_bottom_nav.dart'; // ✅ (asegúrate de crear este archivo con AdminBottomNav)
+import '../../../widgets/admin_bottom_nav.dart';
 
 class EstudianteHomeScreen extends StatefulWidget {
   final AppUser user;
@@ -19,10 +20,10 @@ class EstudianteHomeScreen extends StatefulWidget {
 }
 
 class _EstudianteHomeScreenState extends State<EstudianteHomeScreen> {
-  final FirebaseFirestore _db = FirebaseFirestore.instance; // ✅ ahora sí definido correctamente
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
   int _selectedIndex = 0;
-
   late final List<Widget> _screens;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>(); // 👈 para abrir el Drawer
 
   @override
   void initState() {
@@ -38,20 +39,27 @@ class _EstudianteHomeScreenState extends State<EstudianteHomeScreen> {
     final user = widget.user;
 
     return Scaffold(
+      key: _scaffoldKey, // 👈 necesario para abrir el Drawer
       backgroundColor: Colors.grey[100],
+
+      drawer: const PerfilMenu(), // 👈 tu menú lateral reutilizado
+
       body: Column(
         children: [
-          // ✅ Encabezado con gradiente
-          StudentHeader(user: user),
+          // ✅ Header con callback del menú
+          StudentHeader(
+            user: user,
+            onMenuTap: () => _scaffoldKey.currentState?.openDrawer(), // 👈 abre el Drawer
+          ),
 
-          // ✅ Contenido dinámico (pantallas)
+          // ✅ Contenido dinámico
           Expanded(
             child: _screens[_selectedIndex],
           ),
         ],
       ),
 
-      // ✅ Barra inferior personalizada
+      // ✅ Barra inferior
       bottomNavigationBar: AdminBottomNav(
         currentIndex: _selectedIndex,
         onTap: (i) => setState(() => _selectedIndex = i),
@@ -66,19 +74,6 @@ class _EstudianteHomeScreenState extends State<EstudianteHomeScreen> {
           ),
         ],
       ),
-
-      // ✅ Botón de cerrar sesión en la esquina superior derecha
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.redAccent,
-        onPressed: () async {
-          await FirebaseAuth.instance.signOut();
-          if (context.mounted) {
-            Navigator.pushReplacementNamed(context, "/login");
-          }
-        },
-        child: const Icon(Icons.logout),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 }

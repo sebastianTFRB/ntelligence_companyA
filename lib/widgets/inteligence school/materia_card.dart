@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:intelligence_company_ia/models/users_model.dart';
 import 'package:intelligence_company_ia/screens/estudiante/estudiante_materia_screen.dart';
 import '../../../models/inteligenceshool/materia_model.dart';
 
 class MateriaCard extends StatelessWidget {
   final Materia materia;
+  final AppUser user; // 👈 añadimos el usuario aquí
 
-  const MateriaCard({super.key, required this.materia});
+  const MateriaCard({
+    super.key,
+    required this.materia,
+    required this.user,
+  });
 
   // 🔹 Map con estilos según materia genérica
   Map<String, dynamic> _getEstilo(String materiaGenerica) {
@@ -52,8 +58,10 @@ class MateriaCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  EstudianteMateriaScreen(materiaId: materia.id),
+              builder: (context) => EstudianteMateriaScreen(
+                materiaId: materia.id,
+                user: user, // 👈 lo pasamos directamente, sin nulls ni route args
+              ),
             ),
           );
         },

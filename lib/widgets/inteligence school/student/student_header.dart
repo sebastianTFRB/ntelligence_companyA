@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import '../../../models/users_model.dart';
 
-class StudentHeader extends StatelessWidget {
+class StudentHeader extends StatelessWidget implements PreferredSizeWidget {
   final AppUser user;
+  final VoidCallback onMenuTap;
 
-  const StudentHeader({super.key, required this.user});
+  const StudentHeader({
+    super.key,
+    required this.user,
+    required this.onMenuTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+      padding: const EdgeInsets.only(top: 45, left: 20, right: 20, bottom: 20),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
@@ -17,40 +22,35 @@ class StudentHeader extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(30),
-          bottomRight: Radius.circular(30),
+          bottomLeft: Radius.circular(25),
+          bottomRight: Radius.circular(25),
         ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // 👋 Texto de bienvenida
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "¡Hola!",
-                style: TextStyle(color: Colors.white70, fontSize: 18),
-              ),
-              Text(
-                user.email.split('@').first,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          // 🧑 Nombre del usuario desde Firestore
+          Text(
+            user.nombre.isNotEmpty
+                ? user.nombre
+                : user.email.split('@').first, // fallback
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
           ),
 
-          // 🧑 Avatar
-          const CircleAvatar(
-            radius: 28,
-            backgroundColor: Colors.white,
-            backgroundImage: AssetImage('assets/images/student_avatar.png'),
+          // ☰ Icono menú lateral
+          IconButton(
+            icon: const Icon(Icons.menu, color: Colors.white, size: 30),
+            onPressed: onMenuTap,
           ),
         ],
       ),
     );
   }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(90);
 }
