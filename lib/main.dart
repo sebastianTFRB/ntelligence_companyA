@@ -35,7 +35,7 @@ void main() async {
   // Reemplaza con tus valores de Supabase. 
   // Alternativa segura: carga desde variables de entorno o archivo seguro.
   await Supabase.initialize(
-    url: 'https://ixcynopazubbfqjoortd.supabase.co',        // <- reemplaza
+    url: 'https://ixcynopazubbfqjoortd.supabase.co',       
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4Y3lub3BhenViYmZxam9vcnRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyNDA0OTQsImV4cCI6MjA3NjgxNjQ5NH0.Y7ZQoyQZKuIJpbte_ca-AlmY9v51GQ8gK2Il51B3W1c',           // <- reemplaza
   );
 

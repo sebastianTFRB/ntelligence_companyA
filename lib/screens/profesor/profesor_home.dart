@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intelligence_company_ia/screens/profesor/ProfesorMateriaTabs.dart';
 import 'package:intelligence_company_ia/widgets/inteligence%20school/Teacher/teacher_header.dart';
 import '../../models/users_model.dart';
-import 'profesor_materia_screen.dart'; // ✅ Importa la nueva pantalla
 
 class ProfesorHome extends StatelessWidget {
   final AppUser user;
@@ -117,15 +117,15 @@ class ProfesorHome extends StatelessWidget {
 
                         // ✅ Tap para ir al detalle
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ProfesorMateriaScreen(
-                                materiaId: materia['id'],
-                              ),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ProfesorMateriaTabs(
+                              materiaId: materia['id'],
                             ),
-                          );
-                        },
+                          ),
+                        );
+                      },
                       ),
                     );
                   },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intelligence_company_ia/services/inteligence/chat_service.dart';
 
 class ChatMateriaIA extends StatefulWidget {
   final String materiaId;
@@ -12,6 +13,10 @@ class _ChatMateriaIAState extends State<ChatMateriaIA> {
   final TextEditingController _controller = TextEditingController();
   final List<Map<String, String>> mensajes = [];
   bool loading = false;
+  final ChatService _chatService = ChatService();
+
+  // ⚡ Aquí va el ID del estudiante (en tu app vendrá del perfil o login)
+  final String estudianteId = "1kXc42tfWJQ3FYba93ZtVzRjibx1";
 
   Future<void> _enviarMensaje() async {
     final texto = _controller.text.trim();
@@ -23,14 +28,14 @@ class _ChatMateriaIAState extends State<ChatMateriaIA> {
       loading = true;
     });
 
-    // Simulación de respuesta (conecta tu API real aquí)
-    await Future.delayed(const Duration(seconds: 1));
+    final respuesta = await _chatService.enviarPregunta(
+      widget.materiaId,
+      texto,
+      estudianteId,
+    );
 
     setState(() {
-      mensajes.add({
-        "role": "bot",
-        "text": "Buena pregunta. Según la materia, esto se relaciona con...",
-      });
+      mensajes.add({"role": "bot", "text": respuesta});
       loading = false;
     });
   }
