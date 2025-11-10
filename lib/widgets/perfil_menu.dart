@@ -6,72 +6,150 @@ class PerfilMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
     return Drawer(
-      elevation: 10,
+      elevation: 12,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          bottomLeft: Radius.circular(20),
+          topLeft: Radius.circular(25),
+          bottomLeft: Radius.circular(25),
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const UserAccountsDrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.blueAccent,
+          // 🌈 Encabezado con degradado institucional
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF6A11CB), // 💜 Morado
+                  Color(0xFF2575FC), // 💙 Celeste
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(25),
+              ),
             ),
-            accountName: Text("Sebastián Fajardo Delgado"),
-            accountEmail: Text("sebastian@example.com"),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person, size: 40, color: Colors.blueAccent),
+            child: UserAccountsDrawerHeader(
+              decoration: const BoxDecoration(color: Colors.transparent),
+              accountName: Text(
+                user?.displayName ?? 'Usuario sin nombre',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              accountEmail: Text(
+                user?.email ?? 'Sin correo',
+                style: const TextStyle(color: Colors.white70),
+              ),
+              currentAccountPicture: CircleAvatar(
+                radius: 30,
+                backgroundColor: Colors.white,
+                child: Icon(
+                  Icons.person,
+                  size: 40,
+                  color: Colors.deepPurple[400],
+                ),
+              ),
             ),
           ),
+
+          // ⚙️ Opciones del menú
           ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text("Configuración"),
+            leading: const Icon(Icons.settings, color: Color(0xFF6A11CB)),
+            title: const Text(
+              "Configuración",
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
             onTap: () {
               Navigator.pop(context);
               Navigator.pushNamed(context, "/configuracion");
             },
           ),
           ListTile(
-            leading: const Icon(Icons.history),
-            title: const Text("Historial"),
+            leading: const Icon(Icons.history, color: Color(0xFF6A11CB)),
+            title: const Text(
+              "Historial",
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
             onTap: () {
               Navigator.pop(context);
               Navigator.pushNamed(context, "/historial");
             },
           ),
+
+          const Divider(height: 30, thickness: 1, indent: 15, endIndent: 15),
+
+          // 🚪 Botón de cerrar sesión
           ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text("Cerrar sesión"),
+            leading: const Icon(Icons.logout, color: Colors.redAccent),
+            title: const Text(
+              "Cerrar sesión",
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
             onTap: () async {
-              Navigator.pop(context); // Cierra el menú
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  title: const Text("Cerrar sesión"),
+                  content: const Text(
+                      "¿Seguro que deseas cerrar tu sesión actual?"),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text("Cancelar"),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6A11CB),
+                      ),
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text("Cerrar sesión"),
+                    ),
+                  ],
+                ),
+              );
 
-              try {
-                await FirebaseAuth.instance.signOut(); // Cierra sesión real
-                // Navega al login y elimina historial
-                Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+              if (confirm == true) {
+                try {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/login', (route) => false);
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Sesión cerrada correctamente")),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Error al cerrar sesión: $e")),
-                );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Sesión cerrada correctamente."),
+                      backgroundColor: Color(0xFF6A11CB),
+                    ),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Error al cerrar sesión: $e"),
+                      backgroundColor: Colors.redAccent,
+                    ),
+                  );
+                }
               }
             },
           ),
 
           const Spacer(),
+
+          // 🧾 Versión app
           const Padding(
-            padding: EdgeInsets.all(12.0),
+            padding: EdgeInsets.all(14.0),
             child: Text(
               "Versión 1.0.0",
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Colors.grey, fontSize: 13),
             ),
           ),
         ],

@@ -122,6 +122,7 @@ class ProfesorHome extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (_) => ProfesorMateriaTabs(
                               materiaId: materia['id'],
+                              user: user, // 👈 AGREGA ESTA LÍNEA
                             ),
                           ),
                         );

@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intelligence_company_ia/widgets/perfil_menu.dart';
 import '../../../models/users_model.dart';
 
-class StudentHeader extends StatelessWidget implements PreferredSizeWidget {
+class TeacherHeader2 extends StatelessWidget implements PreferredSizeWidget {
   final AppUser user;
-  final VoidCallback? onMenuTap;
-  final bool showBackButton; // 👈 control dinámico
 
-  const StudentHeader({
-    super.key,
-    required this.user,
-    this.onMenuTap,
-    this.showBackButton = true, // por defecto sí muestra volver
-  });
+  const TeacherHeader2({super.key, required this.user});
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight + 60);
@@ -24,7 +18,7 @@ class StudentHeader extends StatelessWidget implements PreferredSizeWidget {
       height: preferredSize.height + topPadding,
       child: Stack(
         children: [
-          // 🌈 Fondo con gradiente institucional + forma ondulada
+          // 🌈 Fondo degradado morado → celeste con onda
           ClipPath(
             clipper: WaveClipper(),
             child: Container(
@@ -42,7 +36,7 @@ class StudentHeader extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
 
-          // 🎓 Imagen centrada (logo del estudiante)
+          // 📸 Logo centrado
           SafeArea(
             top: true,
             bottom: false,
@@ -50,69 +44,74 @@ class StudentHeader extends StatelessWidget implements PreferredSizeWidget {
               child: Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Image.asset(
-                  'assets/logos/student.png',
+                  'assets/logos/teachers.png',
                   height: 250,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
           ),
 
-          // 🔙 Botón de volver (solo si corresponde)
-          if (showBackButton)
-            SafeArea(
-              top: true,
-              bottom: false,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20),
-                  child: GestureDetector(
-                    onTap: () => Navigator.of(context).maybePop(),
-                    child: const CircleAvatar(
-                      radius: 22,
-                      backgroundColor: Colors.white,
-                      child: Icon(
-                        Icons.arrow_back,
-                        color: Color(0xFF6A11CB),
-                        size: 28,
-                      ),
-                    ),
-                  ),
+          // 🔙 Botón de volver (esquina superior izquierda)
+          SafeArea(
+            top: true,
+            bottom: false,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8, left: 12),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 26),
+                  tooltip: "Volver",
+                  onPressed: () => Navigator.pop(context),
                 ),
               ),
             ),
+          ),
 
-          // 👤 Botón de perfil / menú (derecha)
-          if (onMenuTap != null)
-            SafeArea(
-              top: true,
-              bottom: false,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 20),
-                  child: GestureDetector(
-                    onTap: onMenuTap,
-                    child: const CircleAvatar(
-                      radius: 22,
-                      backgroundColor: Colors.white,
-                      child: Icon(
-                        Icons.person,
-                        color: Color(0xFF6A11CB),
-                        size: 28,
+          // 👤 Botón circular de perfil (abre PerfilMenu)
+          SafeArea(
+            top: true,
+            bottom: false,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => const Align(
+                        alignment: Alignment.centerRight,
+                        child: SizedBox(
+                          width: 280,
+                          child: PerfilMenu(),
+                        ),
                       ),
+                    );
+                  },
+                  child: const CircleAvatar(
+                    radius: 22,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.person,
+                      color: Color(0xFF6A11CB),
+                      size: 28,
                     ),
                   ),
                 ),
               ),
             ),
+          ),
         ],
       ),
     );
   }
 }
 
-/// 🌊 ClipPath para la onda decorativa
+/// 🌊 ClipPath que genera una onda decorativa
 class WaveClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intelligence_company_ia/widgets/perfil_menu.dart';
 import '../../../models/users_model.dart';
 
 class TeacherHeader extends StatelessWidget implements PreferredSizeWidget {
@@ -8,7 +8,7 @@ class TeacherHeader extends StatelessWidget implements PreferredSizeWidget {
   const TeacherHeader({super.key, required this.user});
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 40);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 60);
 
   @override
   Widget build(BuildContext context) {
@@ -18,14 +18,17 @@ class TeacherHeader extends StatelessWidget implements PreferredSizeWidget {
       height: preferredSize.height + topPadding,
       child: Stack(
         children: [
-          // 🌊 Fondo con onda y color degradado
+         
           ClipPath(
             clipper: WaveClipper(),
             child: Container(
               height: preferredSize.height + topPadding,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFF6A11CB), Color(0xFFFFA837)],
+                  colors: [
+                    Color(0xFF6A11CB), // 💜 Morado
+                    Color(0xFF2575FC), // 💙 Celeste
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -33,38 +36,24 @@ class TeacherHeader extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
 
-          // 🧑‍🏫 Nombre del profesor centrado
+          // 📸 Logo centrado
           SafeArea(
             top: true,
             bottom: false,
             child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Profesor ${user.email.split('@').first}",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.1,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    "Panel de clases",
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Image.asset(
+                  'assets/logos/teachers.png',
+                  height: 250, // antes era 60
+                   // opcional, si quieres asegurar tamaño cuadrado
+                   // evita que se recorte
+                ),
               ),
             ),
           ),
 
-          // 👤 Botón de perfil a la derecha
+          // 👤 Botón circular de perfil (abre PerfilMenu)
           SafeArea(
             top: true,
             bottom: false,
@@ -73,32 +62,19 @@ class TeacherHeader extends StatelessWidget implements PreferredSizeWidget {
               child: Padding(
                 padding: const EdgeInsets.only(right: 20),
                 child: GestureDetector(
-                  onTap: () async {
-                    final confirm = await showDialog<bool>(
+                  onTap: () {
+                    showModalBottomSheet(
                       context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: const Text("Cerrar sesión"),
-                        content: const Text("¿Deseas cerrar sesión?"),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(ctx, false),
-                            child: const Text("Cancelar"),
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.deepPurple),
-                            onPressed: () => Navigator.pop(ctx, true),
-                            child: const Text("Cerrar sesión"),
-                          ),
-                        ],
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => const Align(
+                        alignment: Alignment.centerRight,
+                        child: SizedBox(
+                          width: 280,
+                          child: PerfilMenu(),
+                        ),
                       ),
                     );
-
-                    if (confirm == true) {
-                      await FirebaseAuth.instance.signOut();
-                      // Navegar al login
-                      Navigator.pushReplacementNamed(context, "/login");
-                    }
                   },
                   child: const CircleAvatar(
                     radius: 22,
@@ -119,18 +95,18 @@ class TeacherHeader extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// 🌊 ClipPath que genera el efecto de onda
+/// 🌊 ClipPath que genera una onda decorativa
 class WaveClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
-    path.lineTo(0, size.height - 20);
+    path.lineTo(0, size.height - 25);
 
     final firstControlPoint = Offset(size.width / 4, size.height);
-    final firstEndPoint = Offset(size.width / 2, size.height - 20);
+    final firstEndPoint = Offset(size.width / 2, size.height - 25);
 
-    final secondControlPoint = Offset(size.width * 3 / 4, size.height - 40);
-    final secondEndPoint = Offset(size.width, size.height - 20);
+    final secondControlPoint = Offset(size.width * 3 / 4, size.height - 50);
+    final secondEndPoint = Offset(size.width, size.height - 25);
 
     path.quadraticBezierTo(
       firstControlPoint.dx,
@@ -138,7 +114,6 @@ class WaveClipper extends CustomClipper<Path> {
       firstEndPoint.dx,
       firstEndPoint.dy,
     );
-
     path.quadraticBezierTo(
       secondControlPoint.dx,
       secondControlPoint.dy,

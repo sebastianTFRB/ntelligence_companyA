@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:intelligence_company_ia/screens/estudiante/materiasList.dart';
 import 'package:intelligence_company_ia/screens/estudiante/perfil_estudiante_screen.dart';
 import 'package:intelligence_company_ia/widgets/inteligence%20school/student/student_header.dart';
@@ -50,6 +49,8 @@ class _EstudianteHomeScreenState extends State<EstudianteHomeScreen> {
           StudentHeader(
             user: user,
             onMenuTap: () => _scaffoldKey.currentState?.openDrawer(), // 👈 abre el Drawer
+            showBackButton: false, // 👈 oculta el botón
+
           ),
 
           // ✅ Contenido dinámico
