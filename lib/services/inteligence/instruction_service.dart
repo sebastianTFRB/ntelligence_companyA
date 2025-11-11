@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class InstruccionService {
-  final String baseUrl = "http://10.0.2.2:8000/inteligen";
+  final String baseUrl = "http://10.162.66.67:8000/inteligen";
 
   // 🔹 Leer instrucción existente
   Future<String?> leerInstruccion(String materiaId) async {

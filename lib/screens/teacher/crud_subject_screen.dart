@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/inteligence/instruccion_service.dart';
+import '../../services/inteligence/instruction_service.dart';
 
 class CrudInstruccionesScreen extends StatefulWidget {
   final String materiaId;

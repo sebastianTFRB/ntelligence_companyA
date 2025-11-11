@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intelligence_company_ia/screens/profesor/ProfesorMateriaTabs.dart';
+import 'package:intelligence_company_ia/screens/teacher/ProfesorMateriaTabs.dart';
 import 'package:intelligence_company_ia/widgets/inteligence%20school/Teacher/teacher_header.dart';
 import '../../models/users_model.dart';
 

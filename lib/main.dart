@@ -11,15 +11,15 @@ import 'package:intelligence_company_ia/screens/admin/admin_home.dart';
 import 'package:intelligence_company_ia/screens/admin/intelligence_school_screen.dart';
 import 'package:intelligence_company_ia/screens/admin/arritmo_screen.dart';
 import 'package:intelligence_company_ia/screens/admin/recorrido_screen.dart';
-import 'package:intelligence_company_ia/screens/estudiante/estudiante_home.dart';
+import 'package:intelligence_company_ia/screens/estudent/estudiante_home.dart';
 import 'package:intelligence_company_ia/screens/inteligenceschool/crud_grupos_screen.dart';
 
-import 'package:intelligence_company_ia/screens/profesor/profesor_home.dart';
+import 'package:intelligence_company_ia/screens/teacher/teacher_home.dart';
 import 'package:intelligence_company_ia/screens/shared/profile_screen.dart';
 
 // Importa las nuevas pantallas de bloques (ajusta la ruta según tu proyecto)
-import 'package:intelligence_company_ia/screens/profesor/profesor_materia_screen.dart';
-import 'package:intelligence_company_ia/screens/estudiante/estudiante_materia_screen.dart';
+import 'package:intelligence_company_ia/screens/teacher/profesor_materia_screen.dart';
+import 'package:intelligence_company_ia/screens/estudent/estudiante_materia_screen.dart';
 
 import 'package:intelligence_company_ia/models/users_model.dart';
 import 'firebase_options.dart'; // generado por flutterfire configure

@@ -79,10 +79,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset('assets/auth/inicio.png', height: 120),
+                    
                     const SizedBox(height: 16),
                     const Text(
-                      "Iniciar Sesión",
+                      "log in",
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,

@@ -5,7 +5,7 @@ import 'package:audioplayers/audioplayers.dart';
 import '../models/instrucciones.dart';
 
 class IntelligenceAPI {
-  static const String baseUrl = "http://10.162.248.179:8000/inteligens"; 
+  static const String baseUrl = "http://10.162.66.67:8000/inteligens"; 
   // 📌 Cambia por tu IP LAN si pruebas en físico
 
   // ---------------------------

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intelligence_company_ia/models/users_model.dart';
-import 'package:intelligence_company_ia/screens/estudiante/estudiante_materia_screen.dart';
+import 'package:intelligence_company_ia/screens/estudent/estudiante_materia_screen.dart';
 import '../../../models/inteligenceshool/materia_model.dart';
 
 class MateriaCard extends StatelessWidget {

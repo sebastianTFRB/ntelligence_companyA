@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:intelligence_company_ia/models/inteligenceshool/disingMateriasScreen/materia_bloque.dart';
-import 'package:intelligence_company_ia/services/inteligence/materia_service.dart';
+import 'package:intelligence_company_ia/services/inteligence/subject_service.dart';
 import 'package:intelligence_company_ia/widgets/inteligence school/student/materia_tabs.dart';
 import 'package:intelligence_company_ia/widgets/inteligence school/student/student_header.dart';
 import 'package:intelligence_company_ia/widgets/perfil_menu.dart';

@@ -76,10 +76,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset('assets/auth/inicio.png', height: 120),
+                    
                     const SizedBox(height: 16),
                     const Text(
-                      "Registro de Usuario",
+                      "sign in",
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,

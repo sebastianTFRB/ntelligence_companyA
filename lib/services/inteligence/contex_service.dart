@@ -5,7 +5,7 @@ import 'package:path/path.dart' as path;
 import 'package:http_parser/http_parser.dart';
 
 class ContextosService {
-  static const String baseUrl = "http://10.0.2.2:8000/inteligen"; // 🔹 Ajusta si es necesario
+  static const String baseUrl = "http://10.162.66.67:8000/inteligen"; // 🔹 Ajusta si es necesario
 
   // 📤 POST - subir archivo de contexto
   static Future<Map<String, dynamic>> uploadContexto(String materiaId, File archivo) async {

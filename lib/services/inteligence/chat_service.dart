@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ChatService {
-  final String baseUrl = "http://10.0.2.2:8000/inteligen";
+  final String baseUrl = "http://10.162.66.67:8000/inteligen";
 
   Future<String> enviarPregunta(String materiaId, String pregunta, String estudianteId) async {
     final url = Uri.parse("$baseUrl/chat");

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intelligence_company_ia/models/inteligenceshool/disingMateriasScreen/materia_bloque.dart';
-import 'package:intelligence_company_ia/services/inteligence/materia_service.dart';
+import 'package:intelligence_company_ia/services/inteligence/subject_service.dart';
 
 class ProfesorMateriaScreen extends StatefulWidget {
   final String materiaId;

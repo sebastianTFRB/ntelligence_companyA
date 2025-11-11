@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import "../../widgets/inteligence school/Teacher/teacher_header_2.dart";
 import '../../../models/users_model.dart';
 import 'profesor_materia_screen.dart';
-import 'crud_instrucciones_screen.dart';
+import 'crud_subject_screen.dart';
 import 'crud_contextos_screen.dart';
 
 class ProfesorMateriaTabs extends StatelessWidget {

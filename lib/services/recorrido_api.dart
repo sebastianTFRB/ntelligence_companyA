@@ -5,7 +5,7 @@ import 'package:audioplayers/audioplayers.dart';
 import '../models/instrucciones.dart'; // 👈 Reutiliza el mismo modelo
 
 class RecorridoApi {
-  static const String baseUrl = "http://10.162.248.179:8000/recorrido"; 
+  static const String baseUrl = "http://10.162.66.67:8000/recorrido"; 
   // 📌 Cambia por tu IP LAN si usas dispositivo físico
 
   // ---------------------------
